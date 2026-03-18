@@ -265,6 +265,9 @@ const Admin = () => {
                       {lead.calorias_ajustadas} kcal
                     </TableCell>
                     <TableCell className="hidden lg:table-cell text-xs text-muted-foreground">
+                      {ATIVIDADE_LABELS[lead.nivel_atividade] || lead.nivel_atividade}
+                    </TableCell>
+                    <TableCell className="hidden lg:table-cell text-xs text-muted-foreground">
                       {lead.proteina_g}g / {lead.carboidrato_g}g / {lead.gordura_g}g
                     </TableCell>
                     <TableCell className="hidden lg:table-cell text-xs text-muted-foreground">
