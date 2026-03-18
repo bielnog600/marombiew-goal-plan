@@ -232,6 +232,7 @@ const Admin = () => {
                   <TableHead>WhatsApp</TableHead>
                   <TableHead className="hidden md:table-cell">Objetivo</TableHead>
                   <TableHead className="hidden md:table-cell">Calorias</TableHead>
+                  <TableHead className="hidden lg:table-cell">Atividade</TableHead>
                   <TableHead className="hidden lg:table-cell">P / C / G</TableHead>
                   <TableHead className="hidden lg:table-cell">Data</TableHead>
                   <TableHead>Ação</TableHead>
