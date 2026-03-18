@@ -174,7 +174,8 @@ const Index = () => {
                 </div>
                 <div className="space-y-2">
                   <Label>WhatsApp</Label>
-                  <Input placeholder="+351 9XX XXX XXX" value={form.whatsapp} onChange={(e) => updateField("whatsapp", e.target.value)} className="bg-input border-border focus:border-primary" />
+                  <Input placeholder="+351 / +55" value={form.whatsapp} onChange={(e) => updateField("whatsapp", e.target.value)} className="bg-input border-border focus:border-primary" />
+                  <p className="text-xs text-muted-foreground">Portugal (+351) ou Brasil (+55)</p>
                 </div>
               </CardContent>
             </>
