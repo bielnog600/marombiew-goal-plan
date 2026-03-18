@@ -232,6 +232,7 @@ const Admin = () => {
                   <TableHead>WhatsApp</TableHead>
                   <TableHead className="hidden md:table-cell">Objetivo</TableHead>
                   <TableHead className="hidden md:table-cell">Calorias</TableHead>
+                  <TableHead className="hidden lg:table-cell">Atividade</TableHead>
                   <TableHead className="hidden lg:table-cell">P / C / G</TableHead>
                   <TableHead className="hidden lg:table-cell">Data</TableHead>
                   <TableHead>Ação</TableHead>
@@ -262,6 +263,9 @@ const Admin = () => {
                     </TableCell>
                     <TableCell className="hidden md:table-cell text-foreground font-medium">
                       {lead.calorias_ajustadas} kcal
+                    </TableCell>
+                    <TableCell className="hidden lg:table-cell text-xs text-muted-foreground">
+                      {ATIVIDADE_LABELS[lead.nivel_atividade] || lead.nivel_atividade}
                     </TableCell>
                     <TableCell className="hidden lg:table-cell text-xs text-muted-foreground">
                       {lead.proteina_g}g / {lead.carboidrato_g}g / {lead.gordura_g}g
