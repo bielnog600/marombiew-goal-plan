@@ -311,7 +311,7 @@ const Index = () => {
 
                 <a href={whatsappLink()} target="_blank" rel="noopener noreferrer" className="block">
                   <Button className="w-full text-base font-bold py-6 bg-green-600 hover:bg-green-700 text-white">
-                    📲 Quero minha dieta clicada!
+                    📲 Quero a minha dieta!
                   </Button>
                 </a>
 
