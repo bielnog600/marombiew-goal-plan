@@ -28,11 +28,11 @@ type Lead = {
 };
 
 const ATIVIDADE_LABELS: Record<string, string> = {
-  sedentario: "Sedentário",
-  leve: "Leve",
-  moderado: "Moderado",
-  muito: "Muito ativo",
-  extremo: "Extremo",
+  sedentario: "Sedentário (0x/sem)",
+  leve: "Leve (1-3x/sem)",
+  moderado: "Moderado (3-5x/sem)",
+  muito: "Muito ativo (6-7x/sem)",
+  extremo: "Extremo (2x/dia)",
 };
 
 const Admin = () => {
