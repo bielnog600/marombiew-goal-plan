@@ -14,7 +14,63 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      calculator_leads: {
+        Row: {
+          altura: number
+          calorias_ajustadas: number | null
+          carboidrato_g: number | null
+          created_at: string
+          gordura_g: number | null
+          id: string
+          idade: number
+          nivel_atividade: string
+          nome: string
+          objetivo: string
+          peso: number
+          proteina_g: number | null
+          sexo: string
+          tdee: number | null
+          tmb: number | null
+          whatsapp: string
+        }
+        Insert: {
+          altura: number
+          calorias_ajustadas?: number | null
+          carboidrato_g?: number | null
+          created_at?: string
+          gordura_g?: number | null
+          id?: string
+          idade: number
+          nivel_atividade: string
+          nome: string
+          objetivo: string
+          peso: number
+          proteina_g?: number | null
+          sexo: string
+          tdee?: number | null
+          tmb?: number | null
+          whatsapp: string
+        }
+        Update: {
+          altura?: number
+          calorias_ajustadas?: number | null
+          carboidrato_g?: number | null
+          created_at?: string
+          gordura_g?: number | null
+          id?: string
+          idade?: number
+          nivel_atividade?: string
+          nome?: string
+          objetivo?: string
+          peso?: number
+          proteina_g?: number | null
+          sexo?: string
+          tdee?: number | null
+          tmb?: number | null
+          whatsapp?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
