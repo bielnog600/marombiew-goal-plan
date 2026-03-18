@@ -138,7 +138,7 @@ const Index = () => {
 
   const whatsappLink = () => {
     const msg = encodeURIComponent(
-      `Olá! Sou ${form.nome.trim()}, acabei de usar a Marombiew Calc.\n\nMeu objetivo: ${OBJETIVOS[form.objetivo]?.label || form.objetivo}\nCalorias diárias: ${resultado?.caloriasAjustadas} kcal\n\nQuero minha dieta personalizada! 💪`
+      `Olá! Sou ${form.nome.trim()}, acabei de usar a Marombiew Calc.\n\nMeu objetivo: ${OBJETIVOS[form.objetivo]?.label || form.objetivo}\nCalorias diárias: ${resultado?.caloriasAjustadas} kcal\n\nQuero a minha dieta! 💪`
     );
     return `https://wa.me/351939184666?text=${msg}`;
   };
@@ -311,7 +311,7 @@ const Index = () => {
 
                 <a href={whatsappLink()} target="_blank" rel="noopener noreferrer" className="block">
                   <Button className="w-full text-base font-bold py-6 bg-green-600 hover:bg-green-700 text-white">
-                    📲 Quero minha dieta clicada!
+                    📲 Quero a minha dieta!
                   </Button>
                 </a>
 
