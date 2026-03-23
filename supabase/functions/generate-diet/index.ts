@@ -79,7 +79,7 @@ serve(async (req) => {
 
 ${FOODS_DB}
 
-Monte 5-6 refeições usando APENAS alimentos da lista acima com quantidades em gramas. Os macros totais devem bater com a meta. Inclua 3-4 dicas práticas.`;
+Monte 5-6 refeições usando APENAS alimentos da lista acima com quantidades em gramas. Os macros totais devem bater com a meta. Inclua 3-4 dicas práticas. NÃO inclua dicas sobre beber água ou hidratação.`;
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
