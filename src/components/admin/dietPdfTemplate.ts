@@ -461,7 +461,7 @@ body {
   </div>
 
   <div class="footer">
-    MAROMBIEW · Plano alimentar personalizado · Consulte um nutricionista para ajustes individuais
+    MAROMBIEW · Plano alimentar personalizado
   </div>
 
 </div>
