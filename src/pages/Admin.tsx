@@ -310,6 +310,14 @@ const Admin = () => {
                         >
                           🍽️ Dieta
                         </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => { setEditLead(lead); setEditOpen(true); }}
+                          className="text-xs border-border"
+                        >
+                          ✏️ Macros
+                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>
