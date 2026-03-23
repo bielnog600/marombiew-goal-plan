@@ -308,6 +308,8 @@ const Admin = () => {
             </Table>
           </CardContent>
         </Card>
+
+        <DietDialog lead={dietLead} open={dietOpen} onOpenChange={setDietOpen} />
       </div>
     </div>
   );
