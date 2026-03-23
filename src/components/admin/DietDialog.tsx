@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { openDietPDF } from "./dietPdfTemplate";
+import { formatWhatsAppNumber } from "@/lib/formatPhone";
 import type { DietPlan, DietLead } from "./dietTypes";
 import logo from "@/assets/logo_marombiew.png";
 
@@ -16,6 +17,33 @@ const DietDialog = ({ lead, open, onOpenChange }: DietDialogProps) => {
   const [loading, setLoading] = useState(false);
   const [diet, setDiet] = useState<DietPlan | null>(null);
   const [error, setError] = useState("");
+  const [savedDiets, setSavedDiets] = useState<{ id: string; diet_data: DietPlan; created_at: string }[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
+
+  // Load saved diets when dialog opens
+  useEffect(() => {
+    if (open && lead) {
+      loadSavedDiets();
+      setDiet(null);
+      setError("");
+      setShowHistory(false);
+    }
+  }, [open, lead]);
+
+  const loadSavedDiets = async () => {
+    if (!lead) return;
+    const { data } = await supabase
+      .from("generated_diets")
+      .select("id, diet_data, created_at")
+      .eq("lead_id", lead.id)
+      .order("created_at", { ascending: false });
+    if (data) {
+      setSavedDiets(data.map(d => ({
+        ...d,
+        diet_data: d.diet_data as unknown as DietPlan
+      })));
+    }
+  };
 
   const generateDiet = async () => {
     if (!lead) return;
@@ -30,7 +58,18 @@ const DietDialog = ({ lead, open, onOpenChange }: DietDialogProps) => {
 
       if (fnError) throw fnError;
       if (data?.error) throw new Error(data.error);
-      setDiet(data.diet as DietPlan);
+      
+      const dietData = data.diet as DietPlan;
+      setDiet(dietData);
+
+      // Auto-save to database
+      const { error: saveError } = await supabase
+        .from("generated_diets")
+        .insert({ lead_id: lead.id, diet_data: dietData as any });
+      
+      if (!saveError) {
+        loadSavedDiets();
+      }
     } catch (e: any) {
       setError(e.message || "Erro ao gerar dieta");
     } finally {
@@ -38,9 +77,37 @@ const DietDialog = ({ lead, open, onOpenChange }: DietDialogProps) => {
     }
   };
 
-  const handleDownloadPDF = () => {
-    if (!diet || !lead) return;
-    openDietPDF(lead, diet, logo);
+  const handleDownloadPDF = (dietData?: DietPlan) => {
+    const d = dietData || diet;
+    if (!d || !lead) return;
+    openDietPDF(lead, d, logo);
+  };
+
+  const sendDietWhatsApp = (dietData?: DietPlan) => {
+    const d = dietData || diet;
+    if (!d || !lead) return;
+    
+    const phone = formatWhatsAppNumber(lead.whatsapp);
+    const firstName = lead.nome.split(" ")[0];
+    const objetivo = lead.objetivo === "hipertrofia" ? "💪 Hipertrofia" : "🔥 Emagrecimento";
+    
+    let mealsText = "";
+    d.meals.forEach((meal) => {
+      mealsText += `\n*${meal.emoji} ${meal.name}* (${meal.time})\n`;
+      meal.foods.forEach((f) => {
+        mealsText += `  • ${f.name} - ${f.grams}g\n`;
+      });
+      mealsText += `  _${meal.subtotal.kcal}kcal | P:${meal.subtotal.protein}g | C:${meal.subtotal.carbs}g | G:${meal.subtotal.fat}g_\n`;
+    });
+
+    const msg = `Olá ${firstName}! 👋\n\nSeu *Plano Alimentar Marombiew* está pronto! 🍽️\n\n*Objetivo:* ${objetivo}\n*Meta diária:* ${d.totals.kcal} kcal\n*Macros:* P:${d.totals.protein}g | C:${d.totals.carbs}g | G:${d.totals.fat}g\n${mealsText}\n*💡 Dicas:*\n${d.tips.map((t, i) => `${i + 1}. ${t}`).join("\n")}\n\n_Marombiew · Plano alimentar personalizado_`;
+
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, "_blank");
+  };
+
+  const viewSavedDiet = (saved: { diet_data: DietPlan }) => {
+    setDiet(saved.diet_data);
+    setShowHistory(false);
   };
 
   return (
@@ -48,7 +115,7 @@ const DietDialog = ({ lead, open, onOpenChange }: DietDialogProps) => {
       <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto bg-card border-primary/30">
         <DialogHeader>
           <DialogTitle className="text-primary">
-            🍽️ Gerar Dieta - {lead?.nome}
+            🍽️ Dieta - {lead?.nome}
           </DialogTitle>
           <DialogDescription>
             {lead && (
@@ -59,7 +126,59 @@ const DietDialog = ({ lead, open, onOpenChange }: DietDialogProps) => {
           </DialogDescription>
         </DialogHeader>
 
-        {!diet && !loading && !error && (
+        {/* History toggle */}
+        {savedDiets.length > 0 && !loading && (
+          <div className="flex gap-2 mb-2">
+            <Button
+              variant={showHistory ? "outline" : "default"}
+              size="sm"
+              onClick={() => { setShowHistory(false); setDiet(null); }}
+              className="text-xs"
+            >
+              ➕ Nova Dieta
+            </Button>
+            <Button
+              variant={showHistory ? "default" : "outline"}
+              size="sm"
+              onClick={() => setShowHistory(true)}
+              className="text-xs"
+            >
+              📋 Histórico ({savedDiets.length})
+            </Button>
+          </div>
+        )}
+
+        {/* History view */}
+        {showHistory && (
+          <div className="space-y-2 max-h-[50vh] overflow-y-auto">
+            {savedDiets.map((saved) => (
+              <div key={saved.id} className="border border-border rounded-lg p-3 flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-foreground">
+                    {saved.diet_data.totals.kcal} kcal · P:{saved.diet_data.totals.protein}g · C:{saved.diet_data.totals.carbs}g · G:{saved.diet_data.totals.fat}g
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(saved.created_at).toLocaleString("pt-BR")} · {saved.diet_data.meals.length} refeições
+                  </p>
+                </div>
+                <div className="flex gap-1">
+                  <Button size="sm" variant="ghost" onClick={() => viewSavedDiet(saved)} className="text-xs">
+                    👁️
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => handleDownloadPDF(saved.diet_data)} className="text-xs">
+                    📄
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => sendDietWhatsApp(saved.diet_data)} className="text-xs">
+                    📲
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Generate new */}
+        {!diet && !loading && !error && !showHistory && (
           <div className="text-center py-8">
             <p className="text-muted-foreground mb-4 text-sm">
               A IA vai gerar um plano alimentar personalizado com base nos dados do lead.
@@ -87,7 +206,7 @@ const DietDialog = ({ lead, open, onOpenChange }: DietDialogProps) => {
           </div>
         )}
 
-        {diet && (
+        {diet && !showHistory && (
           <div className="space-y-4">
             {/* Macro summary */}
             <div className="grid grid-cols-4 gap-2">
@@ -109,8 +228,8 @@ const DietDialog = ({ lead, open, onOpenChange }: DietDialogProps) => {
               </div>
             </div>
 
-            {/* Meal cards preview */}
-            <div className="max-h-[40vh] overflow-y-auto space-y-3 pr-1">
+            {/* Meal cards */}
+            <div className="max-h-[35vh] overflow-y-auto space-y-3 pr-1">
               {diet.meals.map((meal, i) => (
                 <div key={i} className="border border-border rounded-lg overflow-hidden">
                   <div className="bg-muted px-4 py-2 flex items-center justify-between">
@@ -151,11 +270,18 @@ const DietDialog = ({ lead, open, onOpenChange }: DietDialogProps) => {
               </div>
             )}
 
-            <div className="flex gap-2 justify-end pt-2">
-              <Button variant="outline" size="sm" onClick={generateDiet}>
+            <div className="flex gap-2 justify-end pt-2 flex-wrap">
+              <Button variant="outline" size="sm" onClick={generateDiet} className="text-xs">
                 🔄 Gerar novamente
               </Button>
-              <Button size="sm" onClick={handleDownloadPDF} className="bg-primary text-primary-foreground font-bold">
+              <Button
+                size="sm"
+                onClick={() => sendDietWhatsApp()}
+                className="text-xs bg-green-600 hover:bg-green-700 text-white"
+              >
+                📲 Enviar WhatsApp
+              </Button>
+              <Button size="sm" onClick={() => handleDownloadPDF()} className="bg-primary text-primary-foreground font-bold text-xs">
                 📄 Salvar PDF
               </Button>
             </div>
