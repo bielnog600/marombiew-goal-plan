@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import DietDialog from "@/components/admin/DietDialog";
+import MacroEditDialog from "@/components/admin/MacroEditDialog";
 import { formatWhatsAppNumber } from "@/lib/formatPhone";
 import logo from "@/assets/logo_marombiew.png";
 
