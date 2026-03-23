@@ -19,6 +19,7 @@ const DietDialog = ({ lead, open, onOpenChange }: DietDialogProps) => {
   const [error, setError] = useState("");
   const [savedDiets, setSavedDiets] = useState<{ id: string; diet_data: DietPlan; created_at: string }[]>([]);
   const [showHistory, setShowHistory] = useState(false);
+  const [useCustom, setUseCustom] = useState(true);
 
   // Load saved diets when dialog opens
   useEffect(() => {
@@ -51,9 +52,21 @@ const DietDialog = ({ lead, open, onOpenChange }: DietDialogProps) => {
     setError("");
     setDiet(null);
 
+    // Build lead data with chosen macros
+    const hasCustom = lead.custom_calorias != null;
+    const leadData = useCustom && hasCustom
+      ? {
+          ...lead,
+          calorias_ajustadas: lead.custom_calorias ?? lead.calorias_ajustadas,
+          proteina_g: lead.custom_proteina_g ?? lead.proteina_g,
+          carboidrato_g: lead.custom_carboidrato_g ?? lead.carboidrato_g,
+          gordura_g: lead.custom_gordura_g ?? lead.gordura_g,
+        }
+      : lead;
+
     try {
       const { data, error: fnError } = await supabase.functions.invoke("generate-diet", {
-        body: { lead },
+        body: { lead: leadData },
       });
 
       if (fnError) throw fnError;
@@ -120,7 +133,8 @@ const DietDialog = ({ lead, open, onOpenChange }: DietDialogProps) => {
           <DialogDescription>
             {lead && (
               <span className="text-muted-foreground text-xs">
-                {lead.objetivo === "hipertrofia" ? "💪 Hipertrofia" : "🔥 Emagrecimento"} · {lead.calorias_ajustadas} kcal · P:{lead.proteina_g}g C:{lead.carboidrato_g}g G:{lead.gordura_g}g
+                {lead.objetivo === "hipertrofia" ? "💪 Hipertrofia" : "🔥 Emagrecimento"} · {lead.custom_calorias ?? lead.calorias_ajustadas} kcal · P:{lead.custom_proteina_g ?? lead.proteina_g}g C:{lead.custom_carboidrato_g ?? lead.carboidrato_g}g G:{lead.custom_gordura_g ?? lead.gordura_g}g
+                {lead.custom_calorias != null && <span className="ml-1 text-primary">(personalizado)</span>}
               </span>
             )}
           </DialogDescription>
@@ -183,6 +197,26 @@ const DietDialog = ({ lead, open, onOpenChange }: DietDialogProps) => {
             <p className="text-muted-foreground mb-4 text-sm">
               A IA vai gerar um plano alimentar personalizado com base nos dados do lead.
             </p>
+            {lead && lead.custom_calorias != null && (
+              <div className="flex items-center justify-center gap-3 mb-4">
+                <Button
+                  size="sm"
+                  variant={useCustom ? "default" : "outline"}
+                  onClick={() => setUseCustom(true)}
+                  className="text-xs"
+                >
+                  ✏️ Usar personalizados ({lead.custom_calorias} kcal)
+                </Button>
+                <Button
+                  size="sm"
+                  variant={!useCustom ? "default" : "outline"}
+                  onClick={() => setUseCustom(false)}
+                  className="text-xs"
+                >
+                  📊 Usar originais ({lead.calorias_ajustadas} kcal)
+                </Button>
+              </div>
+            )}
             <Button onClick={generateDiet} className="font-bold">
               🤖 Gerar Dieta com IA
             </Button>

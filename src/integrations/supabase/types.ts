@@ -20,6 +20,10 @@ export type Database = {
           calorias_ajustadas: number | null
           carboidrato_g: number | null
           created_at: string
+          custom_calorias: number | null
+          custom_carboidrato_g: number | null
+          custom_gordura_g: number | null
+          custom_proteina_g: number | null
           gordura_g: number | null
           id: string
           idade: number
@@ -38,6 +42,10 @@ export type Database = {
           calorias_ajustadas?: number | null
           carboidrato_g?: number | null
           created_at?: string
+          custom_calorias?: number | null
+          custom_carboidrato_g?: number | null
+          custom_gordura_g?: number | null
+          custom_proteina_g?: number | null
           gordura_g?: number | null
           id?: string
           idade: number
@@ -56,6 +64,10 @@ export type Database = {
           calorias_ajustadas?: number | null
           carboidrato_g?: number | null
           created_at?: string
+          custom_calorias?: number | null
+          custom_carboidrato_g?: number | null
+          custom_gordura_g?: number | null
+          custom_proteina_g?: number | null
           gordura_g?: number | null
           id?: string
           idade?: number

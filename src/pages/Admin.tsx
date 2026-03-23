@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import DietDialog from "@/components/admin/DietDialog";
+import MacroEditDialog from "@/components/admin/MacroEditDialog";
 import { formatWhatsAppNumber } from "@/lib/formatPhone";
 import logo from "@/assets/logo_marombiew.png";
 
@@ -26,9 +27,12 @@ type Lead = {
   proteina_g: number | null;
   carboidrato_g: number | null;
   gordura_g: number | null;
+  custom_calorias: number | null;
+  custom_proteina_g: number | null;
+  custom_carboidrato_g: number | null;
+  custom_gordura_g: number | null;
   created_at: string;
 };
-
 const ATIVIDADE_LABELS: Record<string, string> = {
   sedentario: "Sedentário (0x/sem)",
   leve: "Leve (1-3x/sem)",
@@ -48,6 +52,8 @@ const Admin = () => {
   const [search, setSearch] = useState("");
   const [dietLead, setDietLead] = useState<Lead | null>(null);
   const [dietOpen, setDietOpen] = useState(false);
+  const [editLead, setEditLead] = useState<Lead | null>(null);
+  const [editOpen, setEditOpen] = useState(false);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -266,13 +272,23 @@ const Admin = () => {
                       </Badge>
                     </TableCell>
                     <TableCell className="hidden md:table-cell text-foreground font-medium">
-                      {lead.calorias_ajustadas} kcal
+                      <div>
+                        {lead.custom_calorias ?? lead.calorias_ajustadas} kcal
+                        {lead.custom_calorias != null && (
+                          <span className="text-[10px] text-muted-foreground block line-through">{lead.calorias_ajustadas}</span>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell className="hidden lg:table-cell text-xs text-muted-foreground">
                       {ATIVIDADE_LABELS[lead.nivel_atividade] || lead.nivel_atividade}
                     </TableCell>
                     <TableCell className="hidden lg:table-cell text-xs text-muted-foreground">
-                      {lead.proteina_g}g / {lead.carboidrato_g}g / {lead.gordura_g}g
+                      <div>
+                        {lead.custom_proteina_g ?? lead.proteina_g}g / {lead.custom_carboidrato_g ?? lead.carboidrato_g}g / {lead.custom_gordura_g ?? lead.gordura_g}g
+                        {lead.custom_proteina_g != null && (
+                          <span className="block text-[10px] line-through">{lead.proteina_g}g / {lead.carboidrato_g}g / {lead.gordura_g}g</span>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell className="hidden lg:table-cell text-xs text-muted-foreground">
                       {new Date(lead.created_at).toLocaleDateString("pt-BR")}
@@ -294,6 +310,14 @@ const Admin = () => {
                         >
                           🍽️ Dieta
                         </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => { setEditLead(lead); setEditOpen(true); }}
+                          className="text-xs border-border"
+                        >
+                          ✏️ Macros
+                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -311,6 +335,7 @@ const Admin = () => {
         </Card>
 
         <DietDialog lead={dietLead} open={dietOpen} onOpenChange={setDietOpen} />
+        <MacroEditDialog lead={editLead} open={editOpen} onOpenChange={setEditOpen} onSaved={fetchLeads} />
       </div>
     </div>
   );

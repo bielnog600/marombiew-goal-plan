@@ -47,5 +47,9 @@ export type DietLead = {
   proteina_g: number | null;
   carboidrato_g: number | null;
   gordura_g: number | null;
+  custom_calorias: number | null;
+  custom_proteina_g: number | null;
+  custom_carboidrato_g: number | null;
+  custom_gordura_g: number | null;
   created_at: string;
 };
