@@ -272,13 +272,23 @@ const Admin = () => {
                       </Badge>
                     </TableCell>
                     <TableCell className="hidden md:table-cell text-foreground font-medium">
-                      {lead.calorias_ajustadas} kcal
+                      <div>
+                        {lead.custom_calorias ?? lead.calorias_ajustadas} kcal
+                        {lead.custom_calorias != null && (
+                          <span className="text-[10px] text-muted-foreground block line-through">{lead.calorias_ajustadas}</span>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell className="hidden lg:table-cell text-xs text-muted-foreground">
                       {ATIVIDADE_LABELS[lead.nivel_atividade] || lead.nivel_atividade}
                     </TableCell>
                     <TableCell className="hidden lg:table-cell text-xs text-muted-foreground">
-                      {lead.proteina_g}g / {lead.carboidrato_g}g / {lead.gordura_g}g
+                      <div>
+                        {lead.custom_proteina_g ?? lead.proteina_g}g / {lead.custom_carboidrato_g ?? lead.carboidrato_g}g / {lead.custom_gordura_g ?? lead.gordura_g}g
+                        {lead.custom_proteina_g != null && (
+                          <span className="block text-[10px] line-through">{lead.proteina_g}g / {lead.carboidrato_g}g / {lead.gordura_g}g</span>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell className="hidden lg:table-cell text-xs text-muted-foreground">
                       {new Date(lead.created_at).toLocaleDateString("pt-BR")}
