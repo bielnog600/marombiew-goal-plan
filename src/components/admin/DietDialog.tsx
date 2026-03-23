@@ -52,9 +52,21 @@ const DietDialog = ({ lead, open, onOpenChange }: DietDialogProps) => {
     setError("");
     setDiet(null);
 
+    // Build lead data with chosen macros
+    const hasCustom = lead.custom_calorias != null;
+    const leadData = useCustom && hasCustom
+      ? {
+          ...lead,
+          calorias_ajustadas: lead.custom_calorias ?? lead.calorias_ajustadas,
+          proteina_g: lead.custom_proteina_g ?? lead.proteina_g,
+          carboidrato_g: lead.custom_carboidrato_g ?? lead.carboidrato_g,
+          gordura_g: lead.custom_gordura_g ?? lead.gordura_g,
+        }
+      : lead;
+
     try {
       const { data, error: fnError } = await supabase.functions.invoke("generate-diet", {
-        body: { lead },
+        body: { lead: leadData },
       });
 
       if (fnError) throw fnError;
