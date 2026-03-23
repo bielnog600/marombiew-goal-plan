@@ -69,64 +69,17 @@ serve(async (req) => {
 
     const { lead } = await req.json();
 
-    const prompt = `Você é um nutricionista esportivo especialista. Crie um plano alimentar COMPLETO e PERSONALIZADO para o seguinte aluno:
-
-DADOS DO ALUNO:
+    const prompt = `Crie um plano alimentar personalizado para:
 - Nome: ${lead.nome}
-- Sexo: ${lead.sexo === "masculino" ? "Masculino" : "Feminino"}
-- Idade: ${lead.idade} anos
-- Peso: ${lead.peso} kg
-- Altura: ${lead.altura} cm
+- Sexo: ${lead.sexo === "masculino" ? "Masculino" : "Feminino"}  
+- Idade: ${lead.idade} anos, Peso: ${lead.peso}kg, Altura: ${lead.altura}cm
 - Nível de atividade: ${lead.nivel_atividade}
-- Objetivo: ${lead.objetivo === "hipertrofia" ? "Ganho de massa muscular (Hipertrofia)" : "Emagrecimento (Perda de gordura)"}
-- TMB: ${lead.tmb} kcal
-- TDEE: ${lead.tdee} kcal
-- Meta calórica diária: ${lead.calorias_ajustadas} kcal
-- Proteína: ${lead.proteina_g}g/dia
-- Carboidrato: ${lead.carboidrato_g}g/dia
-- Gordura: ${lead.gordura_g}g/dia
+- Objetivo: ${lead.objetivo === "hipertrofia" ? "Hipertrofia" : "Emagrecimento"}
+- Meta: ${lead.calorias_ajustadas} kcal/dia | P: ${lead.proteina_g}g | C: ${lead.carboidrato_g}g | G: ${lead.gordura_g}g
 
 ${FOODS_DB}
 
-INSTRUÇÕES:
-1. Monte 5-6 refeições por dia (café da manhã, lanche da manhã, almoço, lanche da tarde, jantar, ceia opcional)
-2. Use APENAS alimentos da lista acima
-3. Indique as QUANTIDADES em gramas para cada alimento
-4. Os macros totais devem bater com a meta: ${lead.calorias_ajustadas} kcal, ${lead.proteina_g}g P, ${lead.carboidrato_g}g C, ${lead.gordura_g}g G
-5. Ao final de cada refeição, mostre o subtotal de kcal, proteína, carboidrato e gordura
-6. Ao final, mostre o TOTAL GERAL do dia
-7. Inclua dicas práticas para o aluno
-
-FORMATO DE RESPOSTA (use EXATAMENTE este formato):
-
-PLANO ALIMENTAR PERSONALIZADO
-Aluno: [nome]
-Objetivo: [objetivo]
-Meta: [calorias] kcal | P: [x]g | C: [x]g | G: [x]g
-
----
-
-REFEIÇÃO 1 - CAFÉ DA MANHÃ (horário sugerido: 07:00)
-• [Alimento] - [X]g ([kcal] kcal | P: [x]g | C: [x]g | G: [x]g)
-• [Alimento] - [X]g ([kcal] kcal | P: [x]g | C: [x]g | G: [x]g)
-Subtotal: [kcal] kcal | P: [x]g | C: [x]g | G: [x]g
-
-[... demais refeições ...]
-
----
-
-TOTAL DO DIA:
-Calorias: [x] kcal
-Proteína: [x]g
-Carboidrato: [x]g
-Gordura: [x]g
-
----
-
-DICAS:
-1. [dica]
-2. [dica]
-3. [dica]`;
+Monte 5-6 refeições usando APENAS alimentos da lista acima com quantidades em gramas. Os macros totais devem bater com a meta. Inclua 3-4 dicas práticas.`;
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -137,9 +90,78 @@ DICAS:
       body: JSON.stringify({
         model: "gpt-4o-mini",
         messages: [
-          { role: "system", content: "Você é um nutricionista esportivo expert. Responda APENAS em português do Brasil. Seja preciso com os cálculos de macronutrientes." },
+          { role: "system", content: "Você é um nutricionista esportivo expert. Responda APENAS em português do Brasil. Seja preciso com os cálculos." },
           { role: "user", content: prompt },
         ],
+        tools: [
+          {
+            type: "function",
+            function: {
+              name: "create_diet_plan",
+              description: "Cria um plano alimentar estruturado com refeições e alimentos",
+              parameters: {
+                type: "object",
+                properties: {
+                  meals: {
+                    type: "array",
+                    description: "Lista de refeições do dia",
+                    items: {
+                      type: "object",
+                      properties: {
+                        name: { type: "string", description: "Nome da refeição ex: Café da Manhã" },
+                        time: { type: "string", description: "Horário sugerido ex: 07:00" },
+                        emoji: { type: "string", description: "Emoji da refeição ex: ☕" },
+                        foods: {
+                          type: "array",
+                          items: {
+                            type: "object",
+                            properties: {
+                              name: { type: "string" },
+                              grams: { type: "number" },
+                              kcal: { type: "number" },
+                              protein: { type: "number" },
+                              carbs: { type: "number" },
+                              fat: { type: "number" }
+                            },
+                            required: ["name", "grams", "kcal", "protein", "carbs", "fat"]
+                          }
+                        },
+                        subtotal: {
+                          type: "object",
+                          properties: {
+                            kcal: { type: "number" },
+                            protein: { type: "number" },
+                            carbs: { type: "number" },
+                            fat: { type: "number" }
+                          },
+                          required: ["kcal", "protein", "carbs", "fat"]
+                        }
+                      },
+                      required: ["name", "time", "emoji", "foods", "subtotal"]
+                    }
+                  },
+                  totals: {
+                    type: "object",
+                    properties: {
+                      kcal: { type: "number" },
+                      protein: { type: "number" },
+                      carbs: { type: "number" },
+                      fat: { type: "number" }
+                    },
+                    required: ["kcal", "protein", "carbs", "fat"]
+                  },
+                  tips: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "3-4 dicas práticas para o aluno"
+                  }
+                },
+                required: ["meals", "totals", "tips"]
+              }
+            }
+          }
+        ],
+        tool_choice: { type: "function", function: { name: "create_diet_plan" } }
       }),
     });
 
@@ -149,20 +171,21 @@ DICAS:
           status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "Créditos insuficientes. Adicione créditos no workspace." }), {
-          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
       const t = await response.text();
-      console.error("AI gateway error:", response.status, t);
-      throw new Error("AI gateway error");
+      console.error("OpenAI error:", response.status, t);
+      throw new Error(`OpenAI error: ${response.status}`);
     }
 
     const data = await response.json();
-    const dietText = data.choices?.[0]?.message?.content || "Erro ao gerar dieta";
+    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
+    
+    if (!toolCall) {
+      throw new Error("No structured response from AI");
+    }
 
-    return new Response(JSON.stringify({ diet: dietText }), {
+    const dietPlan = JSON.parse(toolCall.function.arguments);
+
+    return new Response(JSON.stringify({ diet: dietPlan }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
