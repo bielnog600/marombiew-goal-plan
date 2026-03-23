@@ -98,7 +98,7 @@ const Admin = () => {
 
   const sendWhatsApp = (lead: Lead, customMessage?: string) => {
     const msg = customMessage || `Olá ${lead.nome.split(" ")[0]}! 👋\n\nVi que você usou a Marombiew Calc e seu objetivo é ${lead.objetivo === "hipertrofia" ? "💪 Hipertrofia" : "🔥 Emagrecimento"}.\n\nSeu plano: ${lead.calorias_ajustadas} kcal/dia\n• Proteína: ${lead.proteina_g}g\n• Carbs: ${lead.carboidrato_g}g\n• Gordura: ${lead.gordura_g}g\n\nQuer montar sua dieta personalizada? 🍽️`;
-    const phone = lead.whatsapp.replace(/\D/g, "");
+    const phone = formatWhatsAppNumber(lead.whatsapp);
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, "_blank");
   };
 
