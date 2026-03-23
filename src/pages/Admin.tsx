@@ -277,13 +277,23 @@ const Admin = () => {
                       {new Date(lead.created_at).toLocaleDateString("pt-BR")}
                     </TableCell>
                     <TableCell>
-                      <Button
-                        size="sm"
-                        onClick={() => sendWhatsApp(lead)}
-                        className="bg-green-600 hover:bg-green-700 text-white text-xs"
-                      >
-                        📲 WhatsApp
-                      </Button>
+                      <div className="flex gap-1 flex-col sm:flex-row">
+                        <Button
+                          size="sm"
+                          onClick={() => sendWhatsApp(lead)}
+                          className="bg-green-600 hover:bg-green-700 text-white text-xs"
+                        >
+                          📲 WhatsApp
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => { setDietLead(lead); setDietOpen(true); }}
+                          className="text-xs border-primary/50 text-primary hover:bg-primary/10"
+                        >
+                          🍽️ Dieta
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
