@@ -52,6 +52,8 @@ const Admin = () => {
   const [search, setSearch] = useState("");
   const [dietLead, setDietLead] = useState<Lead | null>(null);
   const [dietOpen, setDietOpen] = useState(false);
+  const [editLead, setEditLead] = useState<Lead | null>(null);
+  const [editOpen, setEditOpen] = useState(false);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
