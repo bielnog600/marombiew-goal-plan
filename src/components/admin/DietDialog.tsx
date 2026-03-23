@@ -1,45 +1,27 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { openDietPDF } from "./dietPdfTemplate";
+import type { DietPlan, DietLead } from "./dietTypes";
 import logo from "@/assets/logo_marombiew.png";
 
-type Lead = {
-  id: string;
-  nome: string;
-  whatsapp: string;
-  sexo: string;
-  idade: number;
-  peso: number;
-  altura: number;
-  nivel_atividade: string;
-  objetivo: string;
-  tmb: number | null;
-  tdee: number | null;
-  calorias_ajustadas: number | null;
-  proteina_g: number | null;
-  carboidrato_g: number | null;
-  gordura_g: number | null;
-  created_at: string;
-};
-
 interface DietDialogProps {
-  lead: Lead | null;
+  lead: DietLead | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
 const DietDialog = ({ lead, open, onOpenChange }: DietDialogProps) => {
   const [loading, setLoading] = useState(false);
-  const [dietText, setDietText] = useState("");
+  const [diet, setDiet] = useState<DietPlan | null>(null);
   const [error, setError] = useState("");
-  const printRef = useRef<HTMLDivElement>(null);
 
   const generateDiet = async () => {
     if (!lead) return;
     setLoading(true);
     setError("");
-    setDietText("");
+    setDiet(null);
 
     try {
       const { data, error: fnError } = await supabase.functions.invoke("generate-diet", {
@@ -48,7 +30,7 @@ const DietDialog = ({ lead, open, onOpenChange }: DietDialogProps) => {
 
       if (fnError) throw fnError;
       if (data?.error) throw new Error(data.error);
-      setDietText(data.diet);
+      setDiet(data.diet as DietPlan);
     } catch (e: any) {
       setError(e.message || "Erro ao gerar dieta");
     } finally {
@@ -56,47 +38,9 @@ const DietDialog = ({ lead, open, onOpenChange }: DietDialogProps) => {
     }
   };
 
-  const handlePrint = () => {
-    if (!printRef.current || !lead) return;
-
-    const printWindow = window.open("", "_blank");
-    if (!printWindow) return;
-
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Dieta - ${lead.nome}</title>
-        <style>
-          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-          * { margin: 0; padding: 0; box-sizing: border-box; }
-          body { font-family: 'Inter', sans-serif; padding: 40px; color: #1a1a1a; line-height: 1.6; }
-          .header { text-align: center; margin-bottom: 30px; border-bottom: 3px solid #F5C518; padding-bottom: 20px; }
-          .header img { height: 60px; margin-bottom: 10px; }
-          .header h1 { font-size: 22px; color: #1a1a1a; }
-          .header p { font-size: 14px; color: #666; }
-          .content { white-space: pre-wrap; font-size: 13px; line-height: 1.8; }
-          .footer { margin-top: 40px; text-align: center; border-top: 2px solid #F5C518; padding-top: 15px; font-size: 11px; color: #999; }
-          @media print { body { padding: 20px; } }
-        </style>
-      </head>
-      <body>
-        <div class="header">
-          <img src="${logo}" alt="Marombiew" />
-          <h1>Plano Alimentar Personalizado</h1>
-          <p>${lead.nome} · ${new Date().toLocaleDateString("pt-BR")}</p>
-        </div>
-        <div class="content">${dietText}</div>
-        <div class="footer">
-          Marombiew · Dieta gerada por IA · Consulte um nutricionista para ajustes
-        </div>
-      </body>
-      </html>
-    `);
-    printWindow.document.close();
-    printWindow.onload = () => {
-      printWindow.print();
-    };
+  const handleDownloadPDF = () => {
+    if (!diet || !lead) return;
+    openDietPDF(lead, diet, logo);
   };
 
   return (
@@ -115,7 +59,7 @@ const DietDialog = ({ lead, open, onOpenChange }: DietDialogProps) => {
           </DialogDescription>
         </DialogHeader>
 
-        {!dietText && !loading && (
+        {!diet && !loading && !error && (
           <div className="text-center py-8">
             <p className="text-muted-foreground mb-4 text-sm">
               A IA vai gerar um plano alimentar personalizado com base nos dados do lead.
@@ -143,17 +87,76 @@ const DietDialog = ({ lead, open, onOpenChange }: DietDialogProps) => {
           </div>
         )}
 
-        {dietText && (
-          <div>
-            <div ref={printRef} className="bg-background rounded-lg p-4 text-foreground text-sm whitespace-pre-wrap leading-relaxed max-h-[50vh] overflow-y-auto border border-border">
-              {dietText}
+        {diet && (
+          <div className="space-y-4">
+            {/* Macro summary */}
+            <div className="grid grid-cols-4 gap-2">
+              <div className="bg-primary/20 rounded-lg p-3 text-center">
+                <p className="text-lg font-bold text-primary">{diet.totals.kcal}</p>
+                <p className="text-[10px] text-muted-foreground uppercase">kcal</p>
+              </div>
+              <div className="bg-destructive/15 rounded-lg p-3 text-center">
+                <p className="text-lg font-bold text-destructive">{diet.totals.protein}g</p>
+                <p className="text-[10px] text-muted-foreground uppercase">Proteína</p>
+              </div>
+              <div className="rounded-lg p-3 text-center" style={{ background: "rgba(52,152,219,0.15)" }}>
+                <p className="text-lg font-bold" style={{ color: "#3498db" }}>{diet.totals.carbs}g</p>
+                <p className="text-[10px] text-muted-foreground uppercase">Carboidrato</p>
+              </div>
+              <div className="rounded-lg p-3 text-center" style={{ background: "rgba(46,204,113,0.15)" }}>
+                <p className="text-lg font-bold" style={{ color: "#2ecc71" }}>{diet.totals.fat}g</p>
+                <p className="text-[10px] text-muted-foreground uppercase">Gordura</p>
+              </div>
             </div>
-            <div className="flex gap-2 mt-4 justify-end">
+
+            {/* Meal cards preview */}
+            <div className="max-h-[40vh] overflow-y-auto space-y-3 pr-1">
+              {diet.meals.map((meal, i) => (
+                <div key={i} className="border border-border rounded-lg overflow-hidden">
+                  <div className="bg-muted px-4 py-2 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">{meal.emoji}</span>
+                      <div>
+                        <p className="text-sm font-semibold text-foreground">{meal.name}</p>
+                        <p className="text-[10px] text-muted-foreground">⏰ {meal.time}</p>
+                      </div>
+                    </div>
+                    <span className="text-xs font-bold bg-primary text-primary-foreground px-2 py-1 rounded-full">
+                      {meal.subtotal.kcal} kcal
+                    </span>
+                  </div>
+                  <div className="px-4 py-2 space-y-1">
+                    {meal.foods.map((food, j) => (
+                      <div key={j} className="flex items-center justify-between text-xs text-foreground">
+                        <span className="font-medium">{food.name} <span className="text-muted-foreground">({food.grams}g)</span></span>
+                        <span className="text-muted-foreground text-[10px]">
+                          {food.kcal}cal · P:{food.protein}g · C:{food.carbs}g · G:{food.fat}g
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Tips */}
+            {diet.tips.length > 0 && (
+              <div className="bg-muted rounded-lg p-3">
+                <p className="text-xs font-semibold text-foreground mb-2">💡 Dicas</p>
+                {diet.tips.map((tip, i) => (
+                  <p key={i} className="text-xs text-muted-foreground mb-1">
+                    <span className="text-primary font-bold">{i + 1}.</span> {tip}
+                  </p>
+                ))}
+              </div>
+            )}
+
+            <div className="flex gap-2 justify-end pt-2">
               <Button variant="outline" size="sm" onClick={generateDiet}>
                 🔄 Gerar novamente
               </Button>
-              <Button size="sm" onClick={handlePrint} className="bg-primary text-primary-foreground font-bold">
-                📄 Imprimir / Salvar PDF
+              <Button size="sm" onClick={handleDownloadPDF} className="bg-primary text-primary-foreground font-bold">
+                📄 Salvar PDF
               </Button>
             </div>
           </div>
