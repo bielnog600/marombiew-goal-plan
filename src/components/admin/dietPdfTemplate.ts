@@ -493,7 +493,7 @@ body {
       <div><b>Dias de treino:</b> ${((lead.peso * 50) / 1000).toFixed(1)}L de água</div>
       <div><b>Dias sem treino:</b> ${((lead.peso * 35) / 1000).toFixed(1)}L de água</div>
     </div>
-    <div style="font-size:11px;color:#8892a4;margin-top:6px;">Cálculo: peso × 50ml (treino) / peso × 35ml (descanso)</div>
+    
   </div>
 
   ${buildBpmSection(lead.idade)}
