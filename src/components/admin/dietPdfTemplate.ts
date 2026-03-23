@@ -8,6 +8,38 @@ const ATIVIDADE_LABELS: Record<string, string> = {
   extremo: "Extremo (2x/dia)",
 };
 
+function buildBpmSection(idade: number): string {
+  const fcMax = 220 - idade;
+  const zones = [
+    { zona: "Z1 - Recuperação", pct: "50-60%", min: 50, max: 60, cor: "#3498db", desc: "Aquecimento e recuperação ativa. Melhora a circulação sem sobrecarregar." },
+    { zona: "Z2 - Queima de gordura", pct: "60-70%", min: 60, max: 70, cor: "#2ecc71", desc: "Ideal para emagrecimento. O corpo usa gordura como principal fonte de energia." },
+    { zona: "Z3 - Aeróbico", pct: "70-80%", min: 70, max: 80, cor: "#F5C518", desc: "Melhora resistência cardiovascular. Intensidade moderada sustentável." },
+    { zona: "Z4 - Anaeróbico", pct: "80-90%", min: 80, max: 90, cor: "#e67e22", desc: "Alta intensidade. Aumenta VO2 máx e tolerância ao lactato." },
+    { zona: "Z5 - Máximo", pct: "90-100%", min: 90, max: 100, cor: "#e74c3c", desc: "Esforço máximo. Sprints curtos. Só para atletas condicionados." },
+  ];
+  const rows = zones.map(z => {
+    const bpmMin = Math.round(fcMax * z.min / 100);
+    const bpmMax = Math.round(fcMax * z.max / 100);
+    return '<tr style="border-bottom:1px solid #f0f2f7;">'
+      + '<td style="padding:10px 12px;font-weight:600;color:' + z.cor + ';">' + z.zona + '</td>'
+      + '<td style="padding:10px 12px;text-align:center;color:#3d4455;">' + z.pct + '</td>'
+      + '<td style="padding:10px 12px;text-align:center;font-weight:600;color:#1a1a2e;">' + bpmMin + ' - ' + bpmMax + '</td>'
+      + '<td style="padding:10px 12px;color:#3d4455;font-size:11px;line-height:1.4;">' + z.desc + '</td>'
+      + '</tr>';
+  }).join("");
+
+  return '<div style="background:#fff;border:1px solid #e8ecf1;border-radius:12px;padding:20px 22px;margin-bottom:20px;page-break-inside:avoid;">'
+    + '<div style="font-family:\'Oswald\',sans-serif;font-size:16px;font-weight:600;color:#1a1a2e;text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;">❤️ Zonas de Frequência Cardíaca</div>'
+    + '<div style="font-size:12px;color:#8892a4;margin-bottom:12px;">FC Máxima estimada (220 - idade): <b style="color:#1a1a2e;">' + fcMax + ' bpm</b></div>'
+    + '<table style="width:100%;border-collapse:collapse;font-size:13px;">'
+    + '<thead><tr style="background:#f0f2f7;">'
+    + '<th style="padding:8px 12px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:0.8px;color:#8892a4;font-weight:600;">Zona</th>'
+    + '<th style="padding:8px 12px;text-align:center;font-size:10px;text-transform:uppercase;letter-spacing:0.8px;color:#8892a4;font-weight:600;">% FC Máx</th>'
+    + '<th style="padding:8px 12px;text-align:center;font-size:10px;text-transform:uppercase;letter-spacing:0.8px;color:#8892a4;font-weight:600;">BPM</th>'
+    + '<th style="padding:8px 12px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:0.8px;color:#8892a4;font-weight:600;">Descrição</th>'
+    + '</tr></thead><tbody>' + rows + '</tbody></table></div>';
+}
+
 export function openDietPDF(lead: DietLead, diet: DietPlan, logoUrl: string) {
   const w = window.open("", "_blank");
   if (!w) return;
