@@ -197,6 +197,26 @@ const DietDialog = ({ lead, open, onOpenChange }: DietDialogProps) => {
             <p className="text-muted-foreground mb-4 text-sm">
               A IA vai gerar um plano alimentar personalizado com base nos dados do lead.
             </p>
+            {lead && lead.custom_calorias != null && (
+              <div className="flex items-center justify-center gap-3 mb-4">
+                <Button
+                  size="sm"
+                  variant={useCustom ? "default" : "outline"}
+                  onClick={() => setUseCustom(true)}
+                  className="text-xs"
+                >
+                  ✏️ Usar personalizados ({lead.custom_calorias} kcal)
+                </Button>
+                <Button
+                  size="sm"
+                  variant={!useCustom ? "default" : "outline"}
+                  onClick={() => setUseCustom(false)}
+                  className="text-xs"
+                >
+                  📊 Usar originais ({lead.calorias_ajustadas} kcal)
+                </Button>
+              </div>
+            )}
             <Button onClick={generateDiet} className="font-bold">
               🤖 Gerar Dieta com IA
             </Button>
