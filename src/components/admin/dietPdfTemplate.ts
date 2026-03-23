@@ -455,6 +455,15 @@ body {
     </div>
   </div>
 
+  <div class="water-section" style="background:#e8f4fd;border-radius:12px;padding:18px 22px;margin-bottom:20px;border-left:4px solid #3498db;">
+    <div style="font-family:'Oswald',sans-serif;font-size:16px;font-weight:600;color:#1a1a2e;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">💧 Hidratação Recomendada</div>
+    <div style="display:flex;gap:20px;font-size:14px;color:#3d4455;">
+      <div><b>Dias de treino:</b> ${((lead.peso * 50) / 1000).toFixed(1)}L de água</div>
+      <div><b>Dias sem treino:</b> ${((lead.peso * 35) / 1000).toFixed(1)}L de água</div>
+    </div>
+    <div style="font-size:11px;color:#8892a4;margin-top:6px;">Cálculo: peso × 50ml (treino) / peso × 35ml (descanso)</div>
+  </div>
+
   <div class="tips-section">
     <div class="tips-header">💡 Dicas</div>
     ${tipsHTML}
