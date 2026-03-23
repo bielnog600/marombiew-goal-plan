@@ -71,6 +71,35 @@ export type Database = {
         }
         Relationships: []
       }
+      generated_diets: {
+        Row: {
+          created_at: string
+          diet_data: Json
+          id: string
+          lead_id: string
+        }
+        Insert: {
+          created_at?: string
+          diet_data: Json
+          id?: string
+          lead_id: string
+        }
+        Update: {
+          created_at?: string
+          diet_data?: Json
+          id?: string
+          lead_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generated_diets_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "calculator_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
