@@ -335,6 +335,7 @@ const Admin = () => {
         </Card>
 
         <DietDialog lead={dietLead} open={dietOpen} onOpenChange={setDietOpen} />
+        <MacroEditDialog lead={editLead} open={editOpen} onOpenChange={setEditOpen} onSaved={fetchLeads} />
       </div>
     </div>
   );
