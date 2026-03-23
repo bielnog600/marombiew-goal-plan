@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import DietDialog from "@/components/admin/DietDialog";
 import logo from "@/assets/logo_marombiew.png";
 
 type Lead = {
@@ -44,6 +45,8 @@ const Admin = () => {
   const [authError, setAuthError] = useState("");
   const [leads, setLeads] = useState<Lead[]>([]);
   const [search, setSearch] = useState("");
+  const [dietLead, setDietLead] = useState<Lead | null>(null);
+  const [dietOpen, setDietOpen] = useState(false);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -274,13 +277,23 @@ const Admin = () => {
                       {new Date(lead.created_at).toLocaleDateString("pt-BR")}
                     </TableCell>
                     <TableCell>
-                      <Button
-                        size="sm"
-                        onClick={() => sendWhatsApp(lead)}
-                        className="bg-green-600 hover:bg-green-700 text-white text-xs"
-                      >
-                        📲 WhatsApp
-                      </Button>
+                      <div className="flex gap-1 flex-col sm:flex-row">
+                        <Button
+                          size="sm"
+                          onClick={() => sendWhatsApp(lead)}
+                          className="bg-green-600 hover:bg-green-700 text-white text-xs"
+                        >
+                          📲 WhatsApp
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => { setDietLead(lead); setDietOpen(true); }}
+                          className="text-xs border-primary/50 text-primary hover:bg-primary/10"
+                        >
+                          🍽️ Dieta
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -295,6 +308,8 @@ const Admin = () => {
             </Table>
           </CardContent>
         </Card>
+
+        <DietDialog lead={dietLead} open={dietOpen} onOpenChange={setDietOpen} />
       </div>
     </div>
   );
