@@ -289,6 +289,8 @@ function isPlanValid(plan: DietPlan, lead: Record<string, unknown>) {
     && Math.abs(plan.totals.kcal - targetKcal) <= 90;
 }
 
+const pickRandom = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
+
 function createCalculatedDiet(lead: Record<string, unknown>, tips: string[] = []): DietPlan {
   const targetProtein = Number(lead.proteina_g) || 120;
   const targetCarbs = Number(lead.carboidrato_g) || 120;
@@ -311,32 +313,47 @@ function createCalculatedDiet(lead: Record<string, unknown>, tips: string[] = []
   const foodCarbsPerGram = (name: string) => (FOOD_MAP.get(name)?.carbs || 0) / 100;
   const foodProteinPerGram = (name: string) => (FOOD_MAP.get(name)?.protein || 0) / 100;
 
+  // Fontes escolhidas aleatoriamente para gerar variação entre dietas.
+  const breakfastProtein = pickRandom(["Whey Protein Isolado", "Ovo cozido", "Queijo cottage", "Iogurte grego natural"]);
+  const breakfastCarb = pickRandom(["Aveia em flocos", "Tapioca", "Pão integral", "Torrada integral", "Cuscuz"]);
+  const lunchCarb = pickRandom(["Arroz branco", "Arroz integral", "Macarrão integral", "Mandioca cozida", "Quinoa cozida", "Cuscuz"]);
+  const dinnerCarb = pickRandom(["Batata-doce", "Batata inglesa cozida", "Arroz integral", "Quinoa cozida", "Mandioca cozida"]);
+  const lunchProtein = pickRandom(["Peito de Frango", "Filé de frango grelhado", "Carne bovina magra", "Peito de peru assado"]);
+  const dinnerProtein = pickRandom(["Filé de peixe grelhado", "Salmão grelhado", "Camarão grelhado", "Peito de peru assado", "Peito de Frango"]);
+  const ceiaProtein = pickRandom(["Whey Protein Isolado", "Queijo cottage", "Iogurte grego natural", "Clara de ovo"]);
+  const lunchVeg = pickRandom(["Brócolis cozido", "Espinafre refogado", "Couve refogada"]);
+  const dinnerVeg = pickRandom(["Abobrinha refogada", "Brócolis cozido", "Espinafre refogado", "Couve refogada"]);
+
   // Base enxuta para manter vitaminas/fibras sem estourar carboidratos.
-  add(0, "Whey Protein Isolado", targetProtein >= 120 ? 30 : 22);
-  add(2, "Brócolis cozido", targetCarbs <= 80 ? 50 : 80);
-  add(4, "Abobrinha refogada", targetCarbs <= 80 ? 70 : 100);
+  const wheyGrams = targetProtein >= 120 ? 30 : 22;
+  if (breakfastProtein === "Whey Protein Isolado") add(0, breakfastProtein, wheyGrams);
+  else if (breakfastProtein === "Ovo cozido") add(0, breakfastProtein, 100);
+  else add(0, breakfastProtein, 120);
+
+  add(2, lunchVeg, targetCarbs <= 80 ? 50 : 80);
+  add(4, dinnerVeg, targetCarbs <= 80 ? 70 : 100);
   add(4, "Tomate", 60);
 
   // Carboidratos: calculados para nunca ultrapassar o alvo.
   let remainingCarbs = Math.max(0, targetCarbs - totals().carbs);
-  const oatGrams = Math.floor(Math.min(35, remainingCarbs * 0.22 / foodCarbsPerGram("Aveia em flocos")));
-  add(0, "Aveia em flocos", oatGrams);
+  const breakfastCarbGrams = Math.floor(Math.min(50, remainingCarbs * 0.22 / foodCarbsPerGram(breakfastCarb)));
+  add(0, breakfastCarb, breakfastCarbGrams);
 
   remainingCarbs = Math.max(0, targetCarbs - totals().carbs);
-  const riceGrams = Math.floor(Math.max(0, remainingCarbs * 0.55 / foodCarbsPerGram("Arroz branco")));
-  add(2, "Arroz branco", riceGrams);
+  const lunchCarbGrams = Math.floor(Math.max(0, remainingCarbs * 0.55 / foodCarbsPerGram(lunchCarb)));
+  add(2, lunchCarb, lunchCarbGrams);
 
   remainingCarbs = Math.max(0, targetCarbs - totals().carbs);
-  const potatoGrams = Math.floor(Math.max(0, remainingCarbs / foodCarbsPerGram("Batata-doce")));
-  add(4, "Batata-doce", potatoGrams);
+  const dinnerCarbGrams = Math.floor(Math.max(0, remainingCarbs / foodCarbsPerGram(dinnerCarb)));
+  add(4, dinnerCarb, dinnerCarbGrams);
 
   // Proteína: completa o alvo com fontes magras, sem adicionar carboidratos relevantes.
   let remainingProtein = Math.max(0, targetProtein - totals().protein);
-  add(2, "Peito de Frango", Math.floor((remainingProtein * 0.45) / foodProteinPerGram("Peito de Frango")));
+  add(2, lunchProtein, Math.floor((remainingProtein * 0.45) / foodProteinPerGram(lunchProtein)));
   remainingProtein = Math.max(0, targetProtein - totals().protein);
-  add(4, "Filé de peixe grelhado", Math.floor((remainingProtein * 0.45) / foodProteinPerGram("Filé de peixe grelhado")));
+  add(4, dinnerProtein, Math.floor((remainingProtein * 0.45) / foodProteinPerGram(dinnerProtein)));
   remainingProtein = Math.max(0, targetProtein - totals().protein);
-  add(5, "Atum em água", Math.ceil(remainingProtein / foodProteinPerGram("Atum em água")));
+  add(5, ceiaProtein, Math.ceil(remainingProtein / foodProteinPerGram(ceiaProtein)));
 
   // Gorduras: azeite permite ajuste exato sem mexer em carboidratos.
   let remainingFat = Math.max(0, targetFat - totals().fat);
@@ -384,6 +401,18 @@ serve(async (req) => {
 
     const { lead } = await req.json();
 
+    // Seleção aleatória de destaques por refeição para forçar variação entre gerações.
+    const seedCafe = pickRandom(["Aveia em flocos", "Tapioca", "Pão integral", "Torrada integral", "Cuscuz"]);
+    const seedCafeProt = pickRandom(["Whey Protein Isolado", "Ovo cozido", "Queijo cottage", "Iogurte grego natural"]);
+    const seedAlmoco = pickRandom(["Arroz branco", "Arroz integral", "Macarrão integral", "Mandioca cozida", "Quinoa cozida"]);
+    const seedAlmocoProt = pickRandom(["Peito de Frango", "Filé de frango grelhado", "Carne bovina magra", "Peito de peru assado"]);
+    const seedJantar = pickRandom(["Batata-doce", "Batata inglesa cozida", "Quinoa cozida", "Mandioca cozida"]);
+    const seedJantarProt = pickRandom(["Filé de peixe grelhado", "Salmão grelhado", "Camarão grelhado", "Peito de peru assado"]);
+    const seedCeia = pickRandom(["Queijo cottage", "Iogurte grego natural", "Whey Protein Isolado", "Clara de ovo"]);
+    const seedFruit = pickRandom(["Banana", "Maçã", "Morango", "Mamão", "Kiwi", "Abacaxi"]);
+    const seedVeg = pickRandom(["Brócolis cozido", "Espinafre refogado", "Couve refogada", "Abobrinha refogada"]);
+    const varietyId = crypto.randomUUID().slice(0, 8);
+
     const prompt = `Crie um plano alimentar personalizado para:
 - Nome: ${lead.nome}
 - Sexo: ${lead.sexo === "masculino" ? "Masculino" : "Feminino"}  
@@ -396,7 +425,15 @@ ${FOODS_DB}
 
 Monte 5-6 refeições usando APENAS alimentos da lista acima com quantidades em gramas.
 REGRA CRÍTICA: carboidratos são limite máximo absoluto. Se a meta for ${lead.carboidrato_g}g, a soma dos alimentos NÃO pode passar disso.
-Os totais devem ficar muito próximos da meta, e todas as porções devem ser realistas. Inclua 3-4 dicas práticas. NÃO inclua dicas sobre beber água ou hidratação.`;
+
+DIVERSIDADE OBRIGATÓRIA (variação #${varietyId}): monte esta dieta usando OBRIGATORIAMENTE as seguintes escolhas como destaque de cada refeição (pode complementar com outros da lista quando fizer sentido, mas estes DEVEM aparecer):
+- Café da manhã: carboidrato = ${seedCafe}; proteína = ${seedCafeProt}
+- Almoço: carboidrato = ${seedAlmoco}; proteína = ${seedAlmocoProt}; vegetal = ${seedVeg}
+- Jantar: carboidrato = ${seedJantar}; proteína = ${seedJantarProt}
+- Ceia: proteína = ${seedCeia}
+- Fruta do dia (em algum lanche): ${seedFruit}
+
+NÃO repita a mesma combinação de alimentos padrão; personalize para este cliente específico. Os totais devem ficar muito próximos da meta e as porções realistas. Inclua 3-4 dicas práticas. NÃO inclua dicas sobre beber água ou hidratação.`;
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -406,9 +443,10 @@ Os totais devem ficar muito próximos da meta, e todas as porções devem ser re
       },
       body: JSON.stringify({
         model: "gpt-4o-mini",
-        temperature: 0.1,
+        temperature: 0.9,
+        top_p: 0.95,
         messages: [
-          { role: "system", content: "Você é um nutricionista esportivo expert. Responda APENAS em português do Brasil. Seja preciso com os cálculos." },
+          { role: "system", content: "Você é um nutricionista esportivo expert. Responda APENAS em português do Brasil. Seja preciso com os cálculos e VARIE os alimentos entre dietas diferentes — nunca entregue a mesma combinação padrão." },
           { role: "user", content: prompt },
         ],
         tools: [
