@@ -453,9 +453,11 @@ Os totais devem ficar muito próximos da meta, e todas as porções devem ser re
 
     const aiPlan = JSON.parse(toolCall.function.arguments);
     const normalizedPlan = normalizeDietPlan(aiPlan);
-    const dietPlan = normalizedPlan && isPlanValid(normalizedPlan, lead)
-      ? normalizedPlan
-      : createCalculatedDiet(lead, normalizedPlan?.tips || aiPlan?.tips || []);
+    const dietPlan = attachVariations(
+      normalizedPlan && isPlanValid(normalizedPlan, lead)
+        ? normalizedPlan
+        : createCalculatedDiet(lead, normalizedPlan?.tips || aiPlan?.tips || []),
+    );
 
     return new Response(JSON.stringify({ diet: dietPlan }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
