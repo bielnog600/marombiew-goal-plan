@@ -67,6 +67,7 @@ export function openDietPDF(lead: DietLead, diet: DietPlan, logoUrl: string) {
             <th>Prot</th>
             <th>Carb</th>
             <th>Gord</th>
+            <th class="var-col">Variações (mesma caloria/macro)</th>
           </tr>
         </thead>
         <tbody>
@@ -80,6 +81,11 @@ export function openDietPDF(lead: DietLead, diet: DietPlan, logoUrl: string) {
             <td>${f.protein}g</td>
             <td>${f.carbs}g</td>
             <td>${f.fat}g</td>
+            <td class="var-col">${
+              f.variations && f.variations.length
+                ? f.variations.map((v) => `<div class="var-item">${v.name} <b>${v.grams}g</b></div>`).join("")
+                : '<span class="var-empty">—</span>'
+            }</td>
           </tr>`
             )
             .join("")}
