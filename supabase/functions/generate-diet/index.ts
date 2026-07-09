@@ -60,6 +60,205 @@ Mel|304|0.30|82.40|0.00
 Torrada integral|350|13.67|56.67|8.00
 Cuscuz|112|3.79|23.22|0.16`;
 
+type FoodMacro = { kcal: number; protein: number; carbs: number; fat: number };
+type DietFood = FoodMacro & { name: string; grams: number };
+type DietMeal = {
+  name: string;
+  time: string;
+  emoji: string;
+  foods: DietFood[];
+  subtotal: FoodMacro;
+};
+type DietPlan = {
+  meals: DietMeal[];
+  totals: FoodMacro;
+  tips: string[];
+};
+
+const FOOD_MAP = new Map<string, FoodMacro>();
+const FOOD_NAMES: string[] = [];
+
+for (const line of FOODS_DB.split("\n").slice(1)) {
+  const [name, kcal, protein, carbs, fat] = line.split("|");
+  FOOD_NAMES.push(name);
+  FOOD_MAP.set(name, {
+    kcal: Number(kcal),
+    protein: Number(protein),
+    carbs: Number(carbs),
+    fat: Number(fat),
+  });
+}
+
+const normalizeName = (name: string) =>
+  name
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+
+const round1 = (n: number) => Math.round((Number.isFinite(n) ? n : 0) * 10) / 10;
+const kcalFromMacros = (protein: number, carbs: number, fat: number) => round1(protein * 4 + carbs * 4 + fat * 9);
+
+function findFoodName(name: string): string | null {
+  const normalized = normalizeName(name);
+  return FOOD_NAMES.find((foodName) => normalizeName(foodName) === normalized)
+    || FOOD_NAMES.find((foodName) => normalizeName(foodName).includes(normalized) || normalized.includes(normalizeName(foodName)))
+    || null;
+}
+
+function buildFood(name: string, grams: number): DietFood | null {
+  const foodName = findFoodName(name);
+  if (!foodName) return null;
+
+  const source = FOOD_MAP.get(foodName)!;
+  const factor = Math.max(0, Number(grams) || 0) / 100;
+  const protein = round1(source.protein * factor);
+  const carbs = round1(source.carbs * factor);
+  const fat = round1(source.fat * factor);
+
+  return {
+    name: foodName,
+    grams: Math.round(Math.max(0, Number(grams) || 0)),
+    protein,
+    carbs,
+    fat,
+    // Calorias calculadas pela regra dos macros, para bater 100% com P/C/G.
+    kcal: kcalFromMacros(protein, carbs, fat),
+  };
+}
+
+function sumFoods(foods: DietFood[]): FoodMacro {
+  const protein = round1(foods.reduce((sum, f) => sum + f.protein, 0));
+  const carbs = round1(foods.reduce((sum, f) => sum + f.carbs, 0));
+  const fat = round1(foods.reduce((sum, f) => sum + f.fat, 0));
+  return { protein, carbs, fat, kcal: kcalFromMacros(protein, carbs, fat) };
+}
+
+function normalizeDietPlan(plan: DietPlan): DietPlan | null {
+  if (!plan?.meals?.length) return null;
+
+  const meals = plan.meals.map((meal) => {
+    const foods = (meal.foods || [])
+      .map((food) => buildFood(food.name, food.grams))
+      .filter((food): food is DietFood => Boolean(food));
+
+    return {
+      name: meal.name || "Refeição",
+      time: meal.time || "--:--",
+      emoji: meal.emoji || "🍽️",
+      foods,
+      subtotal: sumFoods(foods),
+    };
+  }).filter((meal) => meal.foods.length > 0);
+
+  if (!meals.length) return null;
+  const allFoods = meals.flatMap((meal) => meal.foods);
+  return {
+    meals,
+    totals: sumFoods(allFoods),
+    tips: Array.isArray(plan.tips) ? plan.tips.filter((tip) => !/água|agua|hidrata/i.test(tip)).slice(0, 4) : [],
+  };
+}
+
+function isPlanValid(plan: DietPlan, lead: Record<string, unknown>) {
+  const targetProtein = Number(lead.proteina_g) || 0;
+  const targetCarbs = Number(lead.carboidrato_g) || 0;
+  const targetFat = Number(lead.gordura_g) || 0;
+  const targetKcal = kcalFromMacros(targetProtein, targetCarbs, targetFat);
+
+  // Carboidratos são limite máximo estrito. Proteína/gordura/calorias aceitam pequena margem prática.
+  return plan.totals.carbs <= targetCarbs + 0.5
+    && Math.abs(plan.totals.protein - targetProtein) <= 8
+    && Math.abs(plan.totals.fat - targetFat) <= 6
+    && Math.abs(plan.totals.kcal - targetKcal) <= 90;
+}
+
+function createCalculatedDiet(lead: Record<string, unknown>, tips: string[] = []): DietPlan {
+  const targetProtein = Number(lead.proteina_g) || 120;
+  const targetCarbs = Number(lead.carboidrato_g) || 120;
+  const targetFat = Number(lead.gordura_g) || 50;
+
+  const meals: DietMeal[] = [
+    { name: "Café da Manhã", time: "07:00", emoji: "☕", foods: [], subtotal: { kcal: 0, protein: 0, carbs: 0, fat: 0 } },
+    { name: "Lanche da Manhã", time: "10:00", emoji: "🥣", foods: [], subtotal: { kcal: 0, protein: 0, carbs: 0, fat: 0 } },
+    { name: "Almoço", time: "13:00", emoji: "🍛", foods: [], subtotal: { kcal: 0, protein: 0, carbs: 0, fat: 0 } },
+    { name: "Lanche da Tarde", time: "16:30", emoji: "🥤", foods: [], subtotal: { kcal: 0, protein: 0, carbs: 0, fat: 0 } },
+    { name: "Jantar", time: "20:00", emoji: "🍽️", foods: [], subtotal: { kcal: 0, protein: 0, carbs: 0, fat: 0 } },
+    { name: "Ceia", time: "22:30", emoji: "🌙", foods: [], subtotal: { kcal: 0, protein: 0, carbs: 0, fat: 0 } },
+  ];
+
+  const add = (mealIndex: number, name: string, grams: number) => {
+    const food = buildFood(name, grams);
+    if (food && food.grams > 0) meals[mealIndex].foods.push(food);
+  };
+  const totals = () => sumFoods(meals.flatMap((meal) => meal.foods));
+  const foodCarbsPerGram = (name: string) => (FOOD_MAP.get(name)?.carbs || 0) / 100;
+  const foodProteinPerGram = (name: string) => (FOOD_MAP.get(name)?.protein || 0) / 100;
+
+  // Base enxuta para manter vitaminas/fibras sem estourar carboidratos.
+  add(0, "Whey Protein Isolado", targetProtein >= 120 ? 30 : 22);
+  add(2, "Brócolis cozido", targetCarbs <= 80 ? 50 : 80);
+  add(4, "Abobrinha refogada", targetCarbs <= 80 ? 70 : 100);
+  add(4, "Tomate", 60);
+
+  // Carboidratos: calculados para nunca ultrapassar o alvo.
+  let remainingCarbs = Math.max(0, targetCarbs - totals().carbs);
+  const oatGrams = Math.floor(Math.min(35, remainingCarbs * 0.22 / foodCarbsPerGram("Aveia em flocos")));
+  add(0, "Aveia em flocos", oatGrams);
+
+  remainingCarbs = Math.max(0, targetCarbs - totals().carbs);
+  const riceGrams = Math.floor(Math.max(0, remainingCarbs * 0.55 / foodCarbsPerGram("Arroz branco")));
+  add(2, "Arroz branco", riceGrams);
+
+  remainingCarbs = Math.max(0, targetCarbs - totals().carbs);
+  const potatoGrams = Math.floor(Math.max(0, remainingCarbs / foodCarbsPerGram("Batata-doce")));
+  add(4, "Batata-doce", potatoGrams);
+
+  // Proteína: completa o alvo com fontes magras, sem adicionar carboidratos relevantes.
+  let remainingProtein = Math.max(0, targetProtein - totals().protein);
+  add(2, "Peito de Frango", Math.floor((remainingProtein * 0.45) / foodProteinPerGram("Peito de Frango")));
+  remainingProtein = Math.max(0, targetProtein - totals().protein);
+  add(4, "Filé de peixe grelhado", Math.floor((remainingProtein * 0.45) / foodProteinPerGram("Filé de peixe grelhado")));
+  remainingProtein = Math.max(0, targetProtein - totals().protein);
+  add(5, "Atum em água", Math.ceil(remainingProtein / foodProteinPerGram("Atum em água")));
+
+  // Gorduras: azeite permite ajuste exato sem mexer em carboidratos.
+  let remainingFat = Math.max(0, targetFat - totals().fat);
+  add(2, "Azeite de oliva", Math.floor(remainingFat * 0.55));
+  remainingFat = Math.max(0, targetFat - totals().fat);
+  add(4, "Azeite de oliva", Math.ceil(remainingFat));
+
+  // Segurança final: se arredondamento passou carboidrato, reduz fontes de carboidrato grama por grama.
+  const carbFoods = ["Batata-doce", "Arroz branco", "Aveia em flocos"];
+  for (const foodName of carbFoods) {
+    while (totals().carbs > targetCarbs + 0.1) {
+      const food = meals.flatMap((meal) => meal.foods).find((item) => item.name === foodName && item.grams > 0);
+      if (!food) break;
+      food.grams -= 1;
+      const recalculated = buildFood(food.name, food.grams);
+      if (recalculated) Object.assign(food, recalculated);
+      else break;
+    }
+  }
+
+  meals.forEach((meal) => {
+    meal.foods = meal.foods.filter((food) => food.grams > 0);
+    meal.subtotal = sumFoods(meal.foods);
+  });
+
+  const defaultTips = [
+    "Pese os alimentos já preparados para manter as porções consistentes.",
+    "Mantenha horários parecidos todos os dias para facilitar adesão ao plano.",
+    "Se sentir fome fora do plano, priorize vegetais com baixo teor calórico.",
+  ];
+
+  return {
+    meals: meals.filter((meal) => meal.foods.length > 0),
+    totals: totals(),
+    tips: (tips.length ? tips : defaultTips).filter((tip) => !/água|agua|hidrata/i.test(tip)).slice(0, 4),
+  };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -75,11 +274,13 @@ serve(async (req) => {
 - Idade: ${lead.idade} anos, Peso: ${lead.peso}kg, Altura: ${lead.altura}cm
 - Nível de atividade: ${lead.nivel_atividade}
 - Objetivo: ${lead.objetivo === "hipertrofia" ? "Hipertrofia" : "Emagrecimento"}
-- Meta: ${lead.calorias_ajustadas} kcal/dia | P: ${lead.proteina_g}g | C: ${lead.carboidrato_g}g | G: ${lead.gordura_g}g
+- Meta obrigatória: ${lead.calorias_ajustadas} kcal/dia | P: ${lead.proteina_g}g | C: ${lead.carboidrato_g}g | G: ${lead.gordura_g}g
 
 ${FOODS_DB}
 
-Monte 5-6 refeições usando APENAS alimentos da lista acima com quantidades em gramas. Os macros totais devem bater com a meta. Inclua 3-4 dicas práticas. NÃO inclua dicas sobre beber água ou hidratação.`;
+Monte 5-6 refeições usando APENAS alimentos da lista acima com quantidades em gramas.
+REGRA CRÍTICA: carboidratos são limite máximo absoluto. Se a meta for ${lead.carboidrato_g}g, a soma dos alimentos NÃO pode passar disso.
+Os totais devem ficar muito próximos da meta, e todas as porções devem ser realistas. Inclua 3-4 dicas práticas. NÃO inclua dicas sobre beber água ou hidratação.`;
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -89,6 +290,7 @@ Monte 5-6 refeições usando APENAS alimentos da lista acima com quantidades em 
       },
       body: JSON.stringify({
         model: "gpt-4o-mini",
+        temperature: 0.1,
         messages: [
           { role: "system", content: "Você é um nutricionista esportivo expert. Responda APENAS em português do Brasil. Seja preciso com os cálculos." },
           { role: "user", content: prompt },
@@ -183,7 +385,11 @@ Monte 5-6 refeições usando APENAS alimentos da lista acima com quantidades em 
       throw new Error("No structured response from AI");
     }
 
-    const dietPlan = JSON.parse(toolCall.function.arguments);
+    const aiPlan = JSON.parse(toolCall.function.arguments);
+    const normalizedPlan = normalizeDietPlan(aiPlan);
+    const dietPlan = normalizedPlan && isPlanValid(normalizedPlan, lead)
+      ? normalizedPlan
+      : createCalculatedDiet(lead, normalizedPlan?.tips || aiPlan?.tips || []);
 
     return new Response(JSON.stringify({ diet: dietPlan }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
