@@ -67,6 +67,7 @@ export function openDietPDF(lead: DietLead, diet: DietPlan, logoUrl: string) {
             <th>Prot</th>
             <th>Carb</th>
             <th>Gord</th>
+            <th class="var-col">Variações (mesma caloria/macro)</th>
           </tr>
         </thead>
         <tbody>
@@ -80,6 +81,11 @@ export function openDietPDF(lead: DietLead, diet: DietPlan, logoUrl: string) {
             <td>${f.protein}g</td>
             <td>${f.carbs}g</td>
             <td>${f.fat}g</td>
+            <td class="var-col">${
+              f.variations && f.variations.length
+                ? f.variations.map((v) => `<div class="var-item">${v.name} <b>${v.grams}g</b></div>`).join("")
+                : '<span class="var-empty">—</span>'
+            }</td>
           </tr>`
             )
             .join("")}
@@ -310,6 +316,26 @@ body {
 }
 .food-table tbody tr:last-child td {
   border-bottom: none;
+}
+.food-table th.var-col,
+.food-table td.var-col {
+  text-align: left;
+  padding-right: 14px;
+  min-width: 180px;
+}
+.food-table td.var-col {
+  font-size: 11px;
+  color: #3d4455;
+  line-height: 1.35;
+}
+.var-item {
+  padding: 1px 0;
+}
+.var-item b {
+  color: #1a1a2e;
+}
+.var-empty {
+  color: #aab;
 }
 
 .meal-subtotal {
