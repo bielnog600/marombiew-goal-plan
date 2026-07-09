@@ -61,7 +61,8 @@ Torrada integral|350|13.67|56.67|8.00
 Cuscuz|112|3.79|23.22|0.16`;
 
 type FoodMacro = { kcal: number; protein: number; carbs: number; fat: number };
-type DietFood = FoodMacro & { name: string; grams: number };
+type DietVariation = { name: string; grams: number };
+type DietFood = FoodMacro & { name: string; grams: number; variations?: DietVariation[] };
 type DietMeal = {
   name: string;
   time: string;
