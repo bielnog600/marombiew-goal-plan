@@ -1,3 +1,8 @@
+export type DietVariation = {
+  name: string;
+  grams: number;
+};
+
 export type DietFood = {
   name: string;
   grams: number;
@@ -5,6 +10,7 @@ export type DietFood = {
   protein: number;
   carbs: number;
   fat: number;
+  variations?: DietVariation[];
 };
 
 export type DietMeal = {
