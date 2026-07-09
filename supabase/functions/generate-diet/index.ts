@@ -334,6 +334,14 @@ function createCalculatedDiet(lead: Record<string, unknown>, tips: string[] = []
   add(4, dinnerVeg, targetCarbs <= 80 ? 70 : 100);
   add(4, "Tomate", 60);
 
+  // Lanches: fruta + gordura boa (variados a cada geração)
+  const morningFruit = pickRandom(["Banana", "Maçã", "Morango", "Mamão", "Kiwi", "Abacaxi", "Laranja"]);
+  const afternoonSnack = pickRandom(["Iogurte grego natural", "Iogurte natural desnatado", "Queijo cottage"]);
+  const nutChoice = pickRandom(["Amêndoas", "Castanha de caju", "Pasta de amendoim"]);
+  add(1, morningFruit, 100);
+  add(1, nutChoice, 15);
+  add(3, afternoonSnack, 120);
+
   // Carboidratos: calculados para nunca ultrapassar o alvo.
   let remainingCarbs = Math.max(0, targetCarbs - totals().carbs);
   const breakfastCarbGrams = Math.floor(Math.min(50, remainingCarbs * 0.22 / foodCarbsPerGram(breakfastCarb)));
@@ -345,7 +353,7 @@ function createCalculatedDiet(lead: Record<string, unknown>, tips: string[] = []
 
   remainingCarbs = Math.max(0, targetCarbs - totals().carbs);
   const dinnerCarbGrams = Math.floor(Math.max(0, remainingCarbs / foodCarbsPerGram(dinnerCarb)));
-  add(4, dinnerCarb, dinnerCarbGrams);
+  add(2, dinnerCarb, dinnerCarbGrams);
 
   // Proteína: completa o alvo com fontes magras, sem adicionar carboidratos relevantes.
   let remainingProtein = Math.max(0, targetProtein - totals().protein);
@@ -362,8 +370,8 @@ function createCalculatedDiet(lead: Record<string, unknown>, tips: string[] = []
   add(4, "Azeite de oliva", Math.ceil(remainingFat));
 
   // Segurança final: se arredondamento passou carboidrato, reduz fontes de carboidrato grama por grama.
-  const carbFoods = ["Batata-doce", "Arroz branco", "Aveia em flocos"];
-  for (const foodName of carbFoods) {
+  const carbFoodsToTrim = [dinnerCarb, lunchCarb, breakfastCarb, morningFruit];
+  for (const foodName of carbFoodsToTrim) {
     while (totals().carbs > targetCarbs + 0.1) {
       const food = meals.flatMap((meal) => meal.foods).find((item) => item.name === foodName && item.grams > 0);
       if (!food) break;
