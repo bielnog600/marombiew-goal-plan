@@ -166,7 +166,55 @@ function dominantMacroKey(name: string): "carbs" | "protein" | "fat" {
   return "carbs";
 }
 
-function buildVariations(food: DietFood): DietVariation[] {
+type MealType = "cafe" | "lanche" | "almoco_jantar" | "ceia";
+
+function detectMealType(mealName: string): MealType {
+  const n = mealName
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+  if (n.includes("ceia")) return "ceia";
+  if (n.includes("cafe") || n.includes("manha")) return "cafe";
+  if (n.includes("almoco") || n.includes("jantar") || n.includes("janta")) return "almoco_jantar";
+  return "lanche";
+}
+
+// Alimentos considerados adequados a cada momento do dia (evita frango na ceia, atum no café etc.).
+const MEAL_ALLOWED: Record<MealType, Set<string>> = {
+  cafe: new Set([
+    "Aveia em flocos", "Tapioca", "Pão integral", "Torrada integral", "Granola sem açúcar",
+    "Cuscuz", "Mel", "Whey Protein Isolado", "Ovo cozido", "Clara de ovo",
+    "Queijo cottage", "Queijo branco", "Iogurte natural desnatado", "Iogurte grego natural",
+    "Leite integral", "Pasta de amendoim", "Castanha de caju", "Amêndoas", "Abacate",
+    "Banana", "Maçã", "Morango", "Mamão", "Kiwi", "Laranja", "Abacaxi",
+  ]),
+  lanche: new Set([
+    "Aveia em flocos", "Tapioca", "Pão integral", "Torrada integral", "Granola sem açúcar",
+    "Whey Protein Isolado", "Ovo cozido", "Clara de ovo", "Queijo cottage", "Queijo branco",
+    "Iogurte natural desnatado", "Iogurte grego natural", "Leite integral",
+    "Pasta de amendoim", "Castanha de caju", "Amêndoas", "Abacate",
+    "Banana", "Maçã", "Morango", "Mamão", "Kiwi", "Laranja", "Abacaxi",
+  ]),
+  almoco_jantar: new Set([
+    "Arroz integral", "Arroz branco", "Batata-doce", "Batata inglesa cozida",
+    "Macarrão integral", "Mandioca cozida", "Quinoa cozida", "Cuscuz",
+    "Feijão preto cozido", "Feijão carioca cozido", "Grão de bico", "Lentilhas",
+    "Filé de frango grelhado", "Peito de Frango", "Carne bovina magra",
+    "Salmão grelhado", "Atum em água", "Filé de peixe grelhado", "Camarão grelhado",
+    "Peito de peru assado", "Ovo cozido",
+    "Brócolis cozido", "Espinafre refogado", "Couve refogada", "Abobrinha refogada",
+    "Cenoura", "Tomate", "Pepino", "Azeite de oliva",
+  ]),
+  ceia: new Set([
+    "Whey Protein Isolado", "Queijo cottage", "Queijo branco",
+    "Iogurte natural desnatado", "Iogurte grego natural", "Leite integral",
+    "Clara de ovo", "Ovo cozido",
+    "Pasta de amendoim", "Amêndoas", "Castanha de caju", "Abacate",
+    "Maçã", "Kiwi", "Mamão",
+  ]),
+};
+
+function buildVariations(food: DietFood, mealType: MealType): DietVariation[] {
   const category = FOOD_CATEGORY[food.name];
   if (!category) return [];
 
@@ -174,8 +222,9 @@ function buildVariations(food: DietFood): DietVariation[] {
   const targetMacro = food[macroKey];
   if (targetMacro <= 0) return [];
 
+  const allowed = MEAL_ALLOWED[mealType];
   const alternatives = FOOD_NAMES.filter(
-    (n) => n !== food.name && FOOD_CATEGORY[n] === category,
+    (n) => n !== food.name && FOOD_CATEGORY[n] === category && allowed.has(n),
   );
 
   const variations: DietVariation[] = [];
@@ -193,8 +242,9 @@ function buildVariations(food: DietFood): DietVariation[] {
 
 function attachVariations(plan: DietPlan): DietPlan {
   plan.meals.forEach((meal) => {
+    const mealType = detectMealType(meal.name);
     meal.foods.forEach((food) => {
-      food.variations = buildVariations(food);
+      food.variations = buildVariations(food, mealType);
     });
   });
   return plan;
