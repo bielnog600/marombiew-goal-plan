@@ -401,6 +401,18 @@ serve(async (req) => {
 
     const { lead } = await req.json();
 
+    // Seleção aleatória de destaques por refeição para forçar variação entre gerações.
+    const seedCafe = pickRandom(["Aveia em flocos", "Tapioca", "Pão integral", "Torrada integral", "Cuscuz"]);
+    const seedCafeProt = pickRandom(["Whey Protein Isolado", "Ovo cozido", "Queijo cottage", "Iogurte grego natural"]);
+    const seedAlmoco = pickRandom(["Arroz branco", "Arroz integral", "Macarrão integral", "Mandioca cozida", "Quinoa cozida"]);
+    const seedAlmocoProt = pickRandom(["Peito de Frango", "Filé de frango grelhado", "Carne bovina magra", "Peito de peru assado"]);
+    const seedJantar = pickRandom(["Batata-doce", "Batata inglesa cozida", "Quinoa cozida", "Mandioca cozida"]);
+    const seedJantarProt = pickRandom(["Filé de peixe grelhado", "Salmão grelhado", "Camarão grelhado", "Peito de peru assado"]);
+    const seedCeia = pickRandom(["Queijo cottage", "Iogurte grego natural", "Whey Protein Isolado", "Clara de ovo"]);
+    const seedFruit = pickRandom(["Banana", "Maçã", "Morango", "Mamão", "Kiwi", "Abacaxi"]);
+    const seedVeg = pickRandom(["Brócolis cozido", "Espinafre refogado", "Couve refogada", "Abobrinha refogada"]);
+    const varietyId = crypto.randomUUID().slice(0, 8);
+
     const prompt = `Crie um plano alimentar personalizado para:
 - Nome: ${lead.nome}
 - Sexo: ${lead.sexo === "masculino" ? "Masculino" : "Feminino"}  
@@ -413,7 +425,15 @@ ${FOODS_DB}
 
 Monte 5-6 refeições usando APENAS alimentos da lista acima com quantidades em gramas.
 REGRA CRÍTICA: carboidratos são limite máximo absoluto. Se a meta for ${lead.carboidrato_g}g, a soma dos alimentos NÃO pode passar disso.
-Os totais devem ficar muito próximos da meta, e todas as porções devem ser realistas. Inclua 3-4 dicas práticas. NÃO inclua dicas sobre beber água ou hidratação.`;
+
+DIVERSIDADE OBRIGATÓRIA (variação #${varietyId}): monte esta dieta usando OBRIGATORIAMENTE as seguintes escolhas como destaque de cada refeição (pode complementar com outros da lista quando fizer sentido, mas estes DEVEM aparecer):
+- Café da manhã: carboidrato = ${seedCafe}; proteína = ${seedCafeProt}
+- Almoço: carboidrato = ${seedAlmoco}; proteína = ${seedAlmocoProt}; vegetal = ${seedVeg}
+- Jantar: carboidrato = ${seedJantar}; proteína = ${seedJantarProt}
+- Ceia: proteína = ${seedCeia}
+- Fruta do dia (em algum lanche): ${seedFruit}
+
+NÃO repita a mesma combinação de alimentos padrão; personalize para este cliente específico. Os totais devem ficar muito próximos da meta e as porções realistas. Inclua 3-4 dicas práticas. NÃO inclua dicas sobre beber água ou hidratação.`;
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -423,9 +443,10 @@ Os totais devem ficar muito próximos da meta, e todas as porções devem ser re
       },
       body: JSON.stringify({
         model: "gpt-4o-mini",
-        temperature: 0.1,
+        temperature: 0.9,
+        top_p: 0.95,
         messages: [
-          { role: "system", content: "Você é um nutricionista esportivo expert. Responda APENAS em português do Brasil. Seja preciso com os cálculos." },
+          { role: "system", content: "Você é um nutricionista esportivo expert. Responda APENAS em português do Brasil. Seja preciso com os cálculos e VARIE os alimentos entre dietas diferentes — nunca entregue a mesma combinação padrão." },
           { role: "user", content: prompt },
         ],
         tools: [
