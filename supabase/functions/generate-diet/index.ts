@@ -135,6 +135,71 @@ function sumFoods(foods: DietFood[]): FoodMacro {
   return { protein, carbs, fat, kcal: kcalFromMacros(protein, carbs, fat) };
 }
 
+// Categoria dominante de cada alimento para encontrar substitutos equivalentes.
+const FOOD_CATEGORY: Record<string, "carbs" | "protein" | "fat" | "vegetable" | "fruit" | "dairy"> = {
+  "Arroz integral": "carbs", "Arroz branco": "carbs", "Batata-doce": "carbs",
+  "Batata inglesa cozida": "carbs", "Macarrão integral": "carbs", "Pão integral": "carbs",
+  "Aveia em flocos": "carbs", "Tapioca": "carbs", "Mandioca cozida": "carbs",
+  "Quinoa cozida": "carbs", "Feijão preto cozido": "carbs", "Feijão carioca cozido": "carbs",
+  "Grão de bico": "carbs", "Lentilhas": "carbs", "Granola sem açúcar": "carbs",
+  "Mel": "carbs", "Torrada integral": "carbs", "Cuscuz": "carbs",
+  "Filé de frango grelhado": "protein", "Peito de Frango": "protein",
+  "Carne bovina magra": "protein", "Salmão grelhado": "protein", "Atum em água": "protein",
+  "Filé de peixe grelhado": "protein", "Camarão grelhado": "protein",
+  "Ovo cozido": "protein", "Clara de ovo": "protein", "Peito de peru assado": "protein",
+  "Whey Protein Isolado": "protein", "Queijo cottage": "protein",
+  "Brócolis cozido": "vegetable", "Espinafre refogado": "vegetable",
+  "Couve refogada": "vegetable", "Abobrinha refogada": "vegetable",
+  "Cenoura": "vegetable", "Tomate": "vegetable", "Pepino": "vegetable",
+  "Banana": "fruit", "Maçã": "fruit", "Morango": "fruit", "Abacaxi": "fruit",
+  "Laranja": "fruit", "Mamão": "fruit", "Kiwi": "fruit",
+  "Abacate": "fat", "Pasta de amendoim": "fat", "Castanha de caju": "fat",
+  "Amêndoas": "fat", "Azeite de oliva": "fat", "Queijo branco": "fat",
+  "Iogurte grego natural": "fat",
+  "Iogurte natural desnatado": "dairy", "Leite integral": "dairy",
+};
+
+function dominantMacroKey(name: string): "carbs" | "protein" | "fat" {
+  const cat = FOOD_CATEGORY[name];
+  if (cat === "protein") return "protein";
+  if (cat === "fat") return "fat";
+  return "carbs";
+}
+
+function buildVariations(food: DietFood): DietVariation[] {
+  const category = FOOD_CATEGORY[food.name];
+  if (!category) return [];
+
+  const macroKey = dominantMacroKey(food.name);
+  const targetMacro = food[macroKey];
+  if (targetMacro <= 0) return [];
+
+  const alternatives = FOOD_NAMES.filter(
+    (n) => n !== food.name && FOOD_CATEGORY[n] === category,
+  );
+
+  const variations: DietVariation[] = [];
+  for (const altName of alternatives) {
+    const source = FOOD_MAP.get(altName)!;
+    const per100 = source[macroKey];
+    if (per100 <= 0.1) continue;
+    const grams = Math.round((targetMacro / per100) * 100);
+    if (grams < 5 || grams > 500) continue;
+    variations.push({ name: altName, grams });
+    if (variations.length >= 3) break;
+  }
+  return variations;
+}
+
+function attachVariations(plan: DietPlan): DietPlan {
+  plan.meals.forEach((meal) => {
+    meal.foods.forEach((food) => {
+      food.variations = buildVariations(food);
+    });
+  });
+  return plan;
+}
+
 function normalizeDietPlan(plan: DietPlan): DietPlan | null {
   if (!plan?.meals?.length) return null;
 
