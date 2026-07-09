@@ -334,6 +334,14 @@ function createCalculatedDiet(lead: Record<string, unknown>, tips: string[] = []
   add(4, dinnerVeg, targetCarbs <= 80 ? 70 : 100);
   add(4, "Tomate", 60);
 
+  // Lanches: fruta + gordura boa (variados a cada geração)
+  const morningFruit = pickRandom(["Banana", "Maçã", "Morango", "Mamão", "Kiwi", "Abacaxi", "Laranja"]);
+  const afternoonSnack = pickRandom(["Iogurte grego natural", "Iogurte natural desnatado", "Queijo cottage"]);
+  const nutChoice = pickRandom(["Amêndoas", "Castanha de caju", "Pasta de amendoim"]);
+  add(1, morningFruit, 100);
+  add(1, nutChoice, 15);
+  add(3, afternoonSnack, 120);
+
   // Carboidratos: calculados para nunca ultrapassar o alvo.
   let remainingCarbs = Math.max(0, targetCarbs - totals().carbs);
   const breakfastCarbGrams = Math.floor(Math.min(50, remainingCarbs * 0.22 / foodCarbsPerGram(breakfastCarb)));
@@ -345,7 +353,7 @@ function createCalculatedDiet(lead: Record<string, unknown>, tips: string[] = []
 
   remainingCarbs = Math.max(0, targetCarbs - totals().carbs);
   const dinnerCarbGrams = Math.floor(Math.max(0, remainingCarbs / foodCarbsPerGram(dinnerCarb)));
-  add(4, dinnerCarb, dinnerCarbGrams);
+  add(2, dinnerCarb, dinnerCarbGrams);
 
   // Proteína: completa o alvo com fontes magras, sem adicionar carboidratos relevantes.
   let remainingProtein = Math.max(0, targetProtein - totals().protein);
@@ -362,8 +370,8 @@ function createCalculatedDiet(lead: Record<string, unknown>, tips: string[] = []
   add(4, "Azeite de oliva", Math.ceil(remainingFat));
 
   // Segurança final: se arredondamento passou carboidrato, reduz fontes de carboidrato grama por grama.
-  const carbFoods = ["Batata-doce", "Arroz branco", "Aveia em flocos"];
-  for (const foodName of carbFoods) {
+  const carbFoodsToTrim = [dinnerCarb, lunchCarb, breakfastCarb, morningFruit];
+  for (const foodName of carbFoodsToTrim) {
     while (totals().carbs > targetCarbs + 0.1) {
       const food = meals.flatMap((meal) => meal.foods).find((item) => item.name === foodName && item.grams > 0);
       if (!food) break;
@@ -396,156 +404,11 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
-    if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY is not configured");
-
     const { lead } = await req.json();
 
-    // Seleção aleatória de destaques por refeição para forçar variação entre gerações.
-    const seedCafe = pickRandom(["Aveia em flocos", "Tapioca", "Pão integral", "Torrada integral", "Cuscuz"]);
-    const seedCafeProt = pickRandom(["Whey Protein Isolado", "Ovo cozido", "Queijo cottage", "Iogurte grego natural"]);
-    const seedAlmoco = pickRandom(["Arroz branco", "Arroz integral", "Macarrão integral", "Mandioca cozida", "Quinoa cozida"]);
-    const seedAlmocoProt = pickRandom(["Peito de Frango", "Filé de frango grelhado", "Carne bovina magra", "Peito de peru assado"]);
-    const seedJantar = pickRandom(["Batata-doce", "Batata inglesa cozida", "Quinoa cozida", "Mandioca cozida"]);
-    const seedJantarProt = pickRandom(["Filé de peixe grelhado", "Salmão grelhado", "Camarão grelhado", "Peito de peru assado"]);
-    const seedCeia = pickRandom(["Queijo cottage", "Iogurte grego natural", "Whey Protein Isolado", "Clara de ovo"]);
-    const seedFruit = pickRandom(["Banana", "Maçã", "Morango", "Mamão", "Kiwi", "Abacaxi"]);
-    const seedVeg = pickRandom(["Brócolis cozido", "Espinafre refogado", "Couve refogada", "Abobrinha refogada"]);
-    const varietyId = crypto.randomUUID().slice(0, 8);
-
-    const prompt = `Crie um plano alimentar personalizado para:
-- Nome: ${lead.nome}
-- Sexo: ${lead.sexo === "masculino" ? "Masculino" : "Feminino"}  
-- Idade: ${lead.idade} anos, Peso: ${lead.peso}kg, Altura: ${lead.altura}cm
-- Nível de atividade: ${lead.nivel_atividade}
-- Objetivo: ${lead.objetivo === "hipertrofia" ? "Hipertrofia" : "Emagrecimento"}
-- Meta obrigatória: ${lead.calorias_ajustadas} kcal/dia | P: ${lead.proteina_g}g | C: ${lead.carboidrato_g}g | G: ${lead.gordura_g}g
-
-${FOODS_DB}
-
-Monte 5-6 refeições usando APENAS alimentos da lista acima com quantidades em gramas.
-REGRA CRÍTICA: carboidratos são limite máximo absoluto. Se a meta for ${lead.carboidrato_g}g, a soma dos alimentos NÃO pode passar disso.
-
-DIVERSIDADE OBRIGATÓRIA (variação #${varietyId}): monte esta dieta usando OBRIGATORIAMENTE as seguintes escolhas como destaque de cada refeição (pode complementar com outros da lista quando fizer sentido, mas estes DEVEM aparecer):
-- Café da manhã: carboidrato = ${seedCafe}; proteína = ${seedCafeProt}
-- Almoço: carboidrato = ${seedAlmoco}; proteína = ${seedAlmocoProt}; vegetal = ${seedVeg}
-- Jantar: carboidrato = ${seedJantar}; proteína = ${seedJantarProt}
-- Ceia: proteína = ${seedCeia}
-- Fruta do dia (em algum lanche): ${seedFruit}
-
-NÃO repita a mesma combinação de alimentos padrão; personalize para este cliente específico. Os totais devem ficar muito próximos da meta e as porções realistas. Inclua 3-4 dicas práticas. NÃO inclua dicas sobre beber água ou hidratação.`;
-
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${OPENAI_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        temperature: 0.9,
-        top_p: 0.95,
-        messages: [
-          { role: "system", content: "Você é um nutricionista esportivo expert. Responda APENAS em português do Brasil. Seja preciso com os cálculos e VARIE os alimentos entre dietas diferentes — nunca entregue a mesma combinação padrão." },
-          { role: "user", content: prompt },
-        ],
-        tools: [
-          {
-            type: "function",
-            function: {
-              name: "create_diet_plan",
-              description: "Cria um plano alimentar estruturado com refeições e alimentos",
-              parameters: {
-                type: "object",
-                properties: {
-                  meals: {
-                    type: "array",
-                    description: "Lista de refeições do dia",
-                    items: {
-                      type: "object",
-                      properties: {
-                        name: { type: "string", description: "Nome da refeição ex: Café da Manhã" },
-                        time: { type: "string", description: "Horário sugerido ex: 07:00" },
-                        emoji: { type: "string", description: "Emoji da refeição ex: ☕" },
-                        foods: {
-                          type: "array",
-                          items: {
-                            type: "object",
-                            properties: {
-                              name: { type: "string" },
-                              grams: { type: "number" },
-                              kcal: { type: "number" },
-                              protein: { type: "number" },
-                              carbs: { type: "number" },
-                              fat: { type: "number" }
-                            },
-                            required: ["name", "grams", "kcal", "protein", "carbs", "fat"]
-                          }
-                        },
-                        subtotal: {
-                          type: "object",
-                          properties: {
-                            kcal: { type: "number" },
-                            protein: { type: "number" },
-                            carbs: { type: "number" },
-                            fat: { type: "number" }
-                          },
-                          required: ["kcal", "protein", "carbs", "fat"]
-                        }
-                      },
-                      required: ["name", "time", "emoji", "foods", "subtotal"]
-                    }
-                  },
-                  totals: {
-                    type: "object",
-                    properties: {
-                      kcal: { type: "number" },
-                      protein: { type: "number" },
-                      carbs: { type: "number" },
-                      fat: { type: "number" }
-                    },
-                    required: ["kcal", "protein", "carbs", "fat"]
-                  },
-                  tips: {
-                    type: "array",
-                    items: { type: "string" },
-                    description: "3-4 dicas práticas para o aluno"
-                  }
-                },
-                required: ["meals", "totals", "tips"]
-              }
-            }
-          }
-        ],
-        tool_choice: { type: "function", function: { name: "create_diet_plan" } }
-      }),
-    });
-
-    if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Muitas requisições. Tente novamente em alguns segundos." }), {
-          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      const t = await response.text();
-      console.error("OpenAI error:", response.status, t);
-      throw new Error(`OpenAI error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
-    
-    if (!toolCall) {
-      throw new Error("No structured response from AI");
-    }
-
-    const aiPlan = JSON.parse(toolCall.function.arguments);
-    const normalizedPlan = normalizeDietPlan(aiPlan);
-    const dietPlan = attachVariations(
-      normalizedPlan && isPlanValid(normalizedPlan, lead)
-        ? normalizedPlan
-        : createCalculatedDiet(lead, normalizedPlan?.tips || aiPlan?.tips || []),
-    );
+    // Geração 100% determinística e randomizada localmente — garante variedade
+    // entre dietas e precisão absoluta nos macros/calorias.
+    const dietPlan = attachVariations(createCalculatedDiet(lead));
 
     return new Response(JSON.stringify({ diet: dietPlan }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
