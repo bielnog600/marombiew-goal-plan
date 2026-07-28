@@ -199,13 +199,22 @@ const DietDialog = ({ lead, open, onOpenChange }: DietDialogProps) => {
                   </p>
                 </div>
                 <div className="flex gap-1">
-                  <Button size="sm" variant="ghost" onClick={() => viewSavedDiet(saved)} className="text-xs">
+                  <Button size="sm" variant="ghost" onClick={() => viewSavedDiet(saved)} className="text-xs" title="Visualizar">
                     👁️
                   </Button>
-                  <Button size="sm" variant="ghost" onClick={() => handleDownloadPDF(saved.diet_data)} className="text-xs">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => { setDiet(saved.diet_data); setShowHistory(false); setEditing(true); }}
+                    className="text-xs"
+                    title="Editar"
+                  >
+                    ✏️
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => handleDownloadPDF(saved.diet_data)} className="text-xs" title="PDF">
                     📄
                   </Button>
-                  <Button size="sm" variant="ghost" onClick={() => sendDietWhatsApp(saved.diet_data)} className="text-xs">
+                  <Button size="sm" variant="ghost" onClick={() => sendDietWhatsApp(saved.diet_data)} className="text-xs" title="WhatsApp">
                     📲
                   </Button>
                 </div>
