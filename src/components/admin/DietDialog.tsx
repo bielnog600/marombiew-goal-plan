@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { openDietPDF } from "./dietPdfTemplate";
 import { formatWhatsAppNumber } from "@/lib/formatPhone";
 import type { DietPlan, DietLead } from "./dietTypes";
+import DietEditor from "./DietEditor";
 import logo from "@/assets/logo_marombiew.png";
 
 interface DietDialogProps {
@@ -20,6 +21,8 @@ const DietDialog = ({ lead, open, onOpenChange }: DietDialogProps) => {
   const [savedDiets, setSavedDiets] = useState<{ id: string; diet_data: DietPlan; created_at: string }[]>([]);
   const [showHistory, setShowHistory] = useState(false);
   const [useCustom, setUseCustom] = useState(true);
+  const [editing, setEditing] = useState(false);
+  const [savingEdit, setSavingEdit] = useState(false);
 
   // Load saved diets when dialog opens
   useEffect(() => {
@@ -28,6 +31,7 @@ const DietDialog = ({ lead, open, onOpenChange }: DietDialogProps) => {
       setDiet(null);
       setError("");
       setShowHistory(false);
+      setEditing(false);
     }
   }, [open, lead]);
 
@@ -121,6 +125,25 @@ const DietDialog = ({ lead, open, onOpenChange }: DietDialogProps) => {
   const viewSavedDiet = (saved: { diet_data: DietPlan }) => {
     setDiet(saved.diet_data);
     setShowHistory(false);
+    setEditing(false);
+  };
+
+  const saveEditedDiet = async (updated: DietPlan) => {
+    if (!lead) return;
+    setSavingEdit(true);
+    try {
+      const { error: saveError } = await supabase
+        .from("generated_diets")
+        .insert({ lead_id: lead.id, diet_data: updated as any });
+      if (saveError) throw saveError;
+      setDiet(updated);
+      setEditing(false);
+      loadSavedDiets();
+    } catch (e: any) {
+      setError(e.message || "Erro ao salvar alterações");
+    } finally {
+      setSavingEdit(false);
+    }
   };
 
   return (
@@ -240,7 +263,16 @@ const DietDialog = ({ lead, open, onOpenChange }: DietDialogProps) => {
           </div>
         )}
 
-        {diet && !showHistory && (
+        {diet && !showHistory && editing && (
+          <DietEditor
+            initial={diet}
+            saving={savingEdit}
+            onSave={saveEditedDiet}
+            onCancel={() => setEditing(false)}
+          />
+        )}
+
+        {diet && !showHistory && !editing && (
           <div className="space-y-4">
             {/* Macro summary */}
             <div className="grid grid-cols-4 gap-2">
@@ -307,6 +339,9 @@ const DietDialog = ({ lead, open, onOpenChange }: DietDialogProps) => {
             <div className="flex gap-2 justify-end pt-2 flex-wrap">
               <Button variant="outline" size="sm" onClick={generateDiet} className="text-xs">
                 🔄 Gerar novamente
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => setEditing(true)} className="text-xs">
+                ✏️ Editar
               </Button>
               <Button
                 size="sm"
