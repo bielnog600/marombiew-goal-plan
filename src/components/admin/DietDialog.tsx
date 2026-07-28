@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { openDietPDF } from "./dietPdfTemplate";
 import { formatWhatsAppNumber } from "@/lib/formatPhone";
 import type { DietPlan, DietLead } from "./dietTypes";
+import DietEditor from "./DietEditor";
 import logo from "@/assets/logo_marombiew.png";
 
 interface DietDialogProps {
