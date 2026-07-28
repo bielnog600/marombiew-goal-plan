@@ -31,6 +31,7 @@ const DietDialog = ({ lead, open, onOpenChange }: DietDialogProps) => {
       setDiet(null);
       setError("");
       setShowHistory(false);
+      setEditing(false);
     }
   }, [open, lead]);
 
