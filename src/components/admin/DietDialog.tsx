@@ -21,6 +21,8 @@ const DietDialog = ({ lead, open, onOpenChange }: DietDialogProps) => {
   const [savedDiets, setSavedDiets] = useState<{ id: string; diet_data: DietPlan; created_at: string }[]>([]);
   const [showHistory, setShowHistory] = useState(false);
   const [useCustom, setUseCustom] = useState(true);
+  const [editing, setEditing] = useState(false);
+  const [savingEdit, setSavingEdit] = useState(false);
 
   // Load saved diets when dialog opens
   useEffect(() => {
