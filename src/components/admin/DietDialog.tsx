@@ -340,6 +340,9 @@ const DietDialog = ({ lead, open, onOpenChange }: DietDialogProps) => {
               <Button variant="outline" size="sm" onClick={generateDiet} className="text-xs">
                 🔄 Gerar novamente
               </Button>
+              <Button variant="outline" size="sm" onClick={() => setEditing(true)} className="text-xs">
+                ✏️ Editar
+              </Button>
               <Button
                 size="sm"
                 onClick={() => sendDietWhatsApp()}
