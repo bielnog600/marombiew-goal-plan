@@ -125,6 +125,25 @@ const DietDialog = ({ lead, open, onOpenChange }: DietDialogProps) => {
   const viewSavedDiet = (saved: { diet_data: DietPlan }) => {
     setDiet(saved.diet_data);
     setShowHistory(false);
+    setEditing(false);
+  };
+
+  const saveEditedDiet = async (updated: DietPlan) => {
+    if (!lead) return;
+    setSavingEdit(true);
+    try {
+      const { error: saveError } = await supabase
+        .from("generated_diets")
+        .insert({ lead_id: lead.id, diet_data: updated as any });
+      if (saveError) throw saveError;
+      setDiet(updated);
+      setEditing(false);
+      loadSavedDiets();
+    } catch (e: any) {
+      setError(e.message || "Erro ao salvar alterações");
+    } finally {
+      setSavingEdit(false);
+    }
   };
 
   return (
