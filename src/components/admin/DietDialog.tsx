@@ -263,7 +263,16 @@ const DietDialog = ({ lead, open, onOpenChange }: DietDialogProps) => {
           </div>
         )}
 
-        {diet && !showHistory && (
+        {diet && !showHistory && editing && (
+          <DietEditor
+            initial={diet}
+            saving={savingEdit}
+            onSave={saveEditedDiet}
+            onCancel={() => setEditing(false)}
+          />
+        )}
+
+        {diet && !showHistory && !editing && (
           <div className="space-y-4">
             {/* Macro summary */}
             <div className="grid grid-cols-4 gap-2">
