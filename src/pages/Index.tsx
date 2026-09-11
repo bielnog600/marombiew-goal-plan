@@ -148,7 +148,7 @@ const Index = () => {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="flex justify-center mb-6">
-          <img src={logo} alt="Marombiew" className="h-20 object-contain" />
+          <img src={logo} alt="Marombiew" className="logo-glow h-20 object-contain" />
         </div>
 
         {/* Progress */}
