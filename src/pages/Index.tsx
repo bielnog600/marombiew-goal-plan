@@ -359,7 +359,7 @@ const Index = () => {
         </Card>
 
           <p className="mt-6 text-center text-xs text-muted-foreground">
-            Marombiew Goal Plan © {new Date().getFullYear()} — Fórmula Mifflin-St Jeor
+            Marombiew © 2026 — Fórmula Mifflin-St Jeor
           </p>
         </div>
       </section>
