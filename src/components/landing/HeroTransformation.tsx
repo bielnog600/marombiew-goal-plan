@@ -1,15 +1,12 @@
 import { useEffect, useState } from "react";
-import { Calculator } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import type { Transformation } from "@/data/transformations";
 
 type HeroTransformationProps = {
   profileImage?: string;
   transformations: Transformation[];
-  onCalculate: () => void;
 };
 
-const HeroTransformation = ({ profileImage, transformations, onCalculate }: HeroTransformationProps) => {
+const HeroTransformation = ({ profileImage, transformations }: HeroTransformationProps) => {
   const [activeSlide, setActiveSlide] = useState(0);
 
   useEffect(() => {
@@ -70,11 +67,11 @@ const HeroTransformation = ({ profileImage, transformations, onCalculate }: Hero
 
       <div className="relative z-20 mx-auto w-full max-w-xl text-center">
         <p className="mb-3 text-xs font-semibold uppercase tracking-[0.3em] text-primary">MAROMBEIW</p>
-        <h1 className="text-5xl font-bold uppercase leading-[0.9] tracking-tight text-white sm:text-6xl">Descubra<br />sua meta</h1>
+        <h1 className="text-5xl font-bold uppercase leading-[0.9] tracking-tight text-white sm:text-6xl">Fabiel Aires</h1>
         <p className="mx-auto mt-4 max-w-sm text-sm leading-6 text-zinc-300">
-          Calcule suas calorias, macros e descubra uma estratégia personalizada para o seu objetivo.
+          Personal Trainer • Online Coaching
         </p>
-        <p className="mt-3 text-xs font-medium uppercase tracking-[0.14em] text-zinc-500">Treino. Nutrição. Estratégia.</p>
+        <p className="mt-3 text-xs font-medium uppercase tracking-[0.14em] text-zinc-500">Treino • Nutrição • Estratégia</p>
 
         <div className="mt-7 flex items-center justify-center gap-3 text-left">
           <span className="h-px w-8 bg-primary/70" />
@@ -82,10 +79,6 @@ const HeroTransformation = ({ profileImage, transformations, onCalculate }: Hero
           <span className="h-px w-8 bg-primary/70" />
         </div>
 
-        <Button onClick={onCalculate} className="mt-6 h-14 w-full rounded-full bg-primary text-sm font-bold tracking-wide text-primary-foreground hover:bg-primary/90" aria-label="Ir para a calculadora de objetivo">
-          <Calculator className="mr-2 h-5 w-5" />
-          CALCULAR MEU OBJETIVO
-        </Button>
       </div>
     </section>
   );

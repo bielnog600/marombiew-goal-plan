@@ -1,14 +1,13 @@
-import { useEffect, useRef, useState } from "react";
-import { Calculator, MessageCircle } from "lucide-react";
+import { useState } from "react";
+import { ArrowLeft, MessageCircle } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Progress } from "@/components/ui/progress";
-import HeroTransformation from "@/components/landing/HeroTransformation";
 import WhatsAppFloatingButton from "@/components/landing/WhatsAppFloatingButton";
-import { heroProfileImage, transformations } from "@/data/transformations";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo_marombiew.png";
 
@@ -46,26 +45,15 @@ const OBJETIVOS: Record<string, { label: string; fator: number; descricao: strin
 };
 
 const TOTAL_STEPS = 5;
-const CONSULTATION_WHATSAPP_LINK = "https://wa.me/351939184666?text=Ol%C3%A1%20Fabiel!%20Fiz%20a%20calculadora%20MAROMBEIW%20e%20gostaria%20de%20saber%20mais%20sobre%20a%20consultoria.";
+const CONSULTATION_WHATSAPP_LINK = "https://wa.me/351939184666?text=Ol%C3%A1%20Fabiel!%20Fiz%20a%20Calculadora%20MAROMBEIW%20e%20gostaria%20de%20saber%20mais%20sobre%20a%20Consultoria%20Online.";
 
 const Index = () => {
-  const calculatorRef = useRef<HTMLElement>(null);
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState<FormData>({
     nome: "", whatsapp: "", sexo: "", idade: "", peso: "", altura: "", nivelAtividade: "", objetivo: "",
   });
   const [resultado, setResultado] = useState<Resultado | null>(null);
-
-  useEffect(() => {
-    if (step === 5) {
-      calculatorRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  }, [step]);
-
-  const scrollToCalculator = () => {
-    calculatorRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
 
   const updateField = (field: keyof FormData, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -161,20 +149,18 @@ const Index = () => {
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#050505]">
-      <HeroTransformation
-        profileImage={heroProfileImage}
-        transformations={transformations}
-        onCalculate={scrollToCalculator}
-      />
-
-      <section ref={calculatorRef} id="calculadora" className="scroll-mt-4 px-4 pb-8 pt-12 sm:px-6">
+      <section id="calculadora" className="scroll-mt-4 px-4 pb-8 pt-6 sm:px-6">
         <div className="mx-auto w-full max-w-md">
+          <Link to="/" className="mb-8 inline-flex items-center gap-2 text-sm font-semibold text-zinc-300 transition-colors hover:text-primary">
+            <ArrowLeft className="h-4 w-4" />
+            VOLTAR
+          </Link>
           <div className="mb-8 text-center">
             <img src={logo} alt="Marombiew" className="logo-glow mx-auto h-16 object-contain" />
-            <p className="mt-5 text-xs font-semibold uppercase tracking-[0.24em] text-primary">Seu plano começa aqui</p>
-            <h2 className="mt-2 text-3xl font-bold uppercase tracking-tight text-white">Calcule seu plano</h2>
+            <p className="mt-5 text-xs font-semibold uppercase tracking-[0.24em] text-primary">MAROMBEIW</p>
+            <h1 className="mt-2 text-3xl font-bold uppercase tracking-tight text-white">Calculadora Fitness</h1>
             <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-zinc-400">
-              Uma estimativa personalizada com base no seu objetivo, sexo, idade, peso, altura e nível de atividade.
+              Descubra uma estimativa personalizada de calorias e macronutrientes para o seu objetivo.
             </p>
           </div>
 
@@ -343,14 +329,14 @@ const Index = () => {
                 </a>
 
                 <div className="rounded-2xl border border-primary/25 bg-primary/10 p-5 text-center">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Quer um plano feito para você?</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Quer uma estratégia feita para você?</p>
                   <p className="mt-3 text-sm leading-6 text-zinc-300">
                     A calculadora oferece uma estimativa. Se quiser uma estratégia individual de treino e alimentação, fale diretamente comigo.
                   </p>
                   <a href={CONSULTATION_WHATSAPP_LINK} target="_blank" rel="noopener noreferrer" className="mt-5 block">
                     <Button className="w-full bg-primary py-6 text-sm font-bold text-primary-foreground hover:bg-primary/90" aria-label="Falar comigo no WhatsApp">
                       <MessageCircle className="mr-2 h-5 w-5" />
-                      FALAR COMIGO NO WHATSAPP
+                      CONSULTORIA ONLINE
                     </Button>
                   </a>
                 </div>
