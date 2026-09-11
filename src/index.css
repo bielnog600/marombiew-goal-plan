@@ -98,3 +98,36 @@
     animation: logo-glow 2.8s ease-in-out infinite;
   }
 }
+
+html {
+  scroll-behavior: smooth;
+}
+
+#calculadora input {
+  min-height: 52px;
+  border-radius: 0.75rem;
+}
+
+#calculadora [role="radio"] {
+  border-color: hsl(var(--primary) / 0.65);
+}
+
+@keyframes transformation-fade {
+  0%, 45% { opacity: 1; transform: scale(1.03); }
+  55%, 100% { opacity: 0; transform: scale(1); }
+}
+
+.transformation-slide {
+  animation: transformation-fade 4.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .transformation-slide,
+  .logo-glow {
+    animation: none;
+  }
+}
