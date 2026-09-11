@@ -59,15 +59,14 @@ const HeroTransformation = ({ profileImage, transformations }: HeroTransformatio
       {profileImage && (
         <img
           src={profileImage}
-          alt="Fabiel, treinador MAROMBEIW"
+          alt="Fabiew, treinador"
           className="absolute bottom-[19%] left-1/2 z-10 h-[67svh] max-h-[670px] w-auto max-w-[70vw] -translate-x-1/2 object-contain object-bottom drop-shadow-[0_20px_28px_rgba(0,0,0,0.7)]"
           fetchPriority="high"
         />
       )}
 
       <div className="relative z-20 mx-auto w-full max-w-xl text-center">
-        <p className="mb-3 text-xs font-semibold uppercase tracking-[0.3em] text-primary">MAROMBEIW</p>
-        <h1 className="text-5xl font-bold uppercase leading-[0.9] tracking-tight text-white sm:text-6xl">Fabiel Aires</h1>
+        <h1 className="text-5xl font-bold uppercase leading-[0.9] tracking-tight text-white sm:text-6xl">Fabiew Aires</h1>
         <p className="mx-auto mt-4 max-w-sm text-sm leading-6 text-zinc-300">
           Personal Trainer • Online Coaching
         </p>
