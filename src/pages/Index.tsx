@@ -365,7 +365,7 @@ const Index = () => {
       </section>
 
       <footer className="border-t border-white/10 px-4 py-8 text-center text-xs text-zinc-500">
-        MAROMBEIW GOAL PLAN — Treino. Nutrição. Estratégia.
+        Marombiew © 2026 — Treino. Nutrição. Estratégia.
       </footer>
 
       <WhatsAppFloatingButton href={CONSULTATION_WHATSAPP_LINK} />
