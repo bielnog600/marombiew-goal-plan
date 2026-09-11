@@ -31,6 +31,11 @@ const HeroTransformation = ({ profileImage, transformations }: HeroTransformatio
           className="absolute bottom-0 left-0 h-[130%] max-w-none w-auto object-contain object-bottom opacity-70"
         />
       </div>
+      <div
+        className="absolute inset-y-0 right-0 z-0 w-[42%] bg-cover bg-center opacity-60"
+        style={{ backgroundImage: "url('/uploads/93aa2f97-1077-434a-91f0-9764f6aed444.jpeg')" }}
+        aria-hidden="true"
+      />
 
       {transformation && (
         <div key={transformation.id} className="transformation-slide absolute inset-0">
