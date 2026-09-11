@@ -157,7 +157,6 @@ const Index = () => {
           </Link>
           <div className="mb-8 text-center">
             <img src={logo} alt="Marombiew" className="logo-glow mx-auto h-16 object-contain" />
-            <p className="mt-5 text-xs font-semibold uppercase tracking-[0.24em] text-primary">MAROMBEIW</p>
             <h1 className="mt-2 text-3xl font-bold uppercase tracking-tight text-white">Calculadora Fitness</h1>
             <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-zinc-400">
               Descubra uma estimativa personalizada de calorias e macronutrientes para o seu objetivo.
