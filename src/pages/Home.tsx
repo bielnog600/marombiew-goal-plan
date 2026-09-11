@@ -35,7 +35,6 @@ const Home = () => {
             >
               <Calculator className="h-7 w-7 shrink-0 text-primary" aria-hidden="true" />
               <span className="flex-1 px-4 text-center">
-                <span className="block text-base font-bold tracking-wide">CALCULADORA FITNESS</span>
                 <span className="mt-1 block text-xs font-medium text-zinc-400">Calcule calorias, macros e sua meta</span>
               </span>
               <span className="w-7 shrink-0" aria-hidden="true" />
@@ -45,9 +44,6 @@ const Home = () => {
         </div>
       </main>
 
-      <footer className="border-t border-white/10 px-4 py-8 text-center text-xs text-zinc-500">
-        MAROMBIEW — Treino. Nutrição. Estratégia.
-      </footer>
     </div>
   );
 };
