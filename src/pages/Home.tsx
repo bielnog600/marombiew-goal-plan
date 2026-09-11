@@ -42,14 +42,11 @@ const Home = () => {
             </Link>
           </div>
 
-          <p className="mt-10 text-center text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-500">
-            Resultados reais • Estratégias reais
-          </p>
         </div>
       </main>
 
       <footer className="border-t border-white/10 px-4 py-8 text-center text-xs text-zinc-500">
-        GOAL PLAN — Treino. Nutrição. Estratégia.
+        MAROMBIEW — Treino. Nutrição. Estratégia.
       </footer>
     </div>
   );

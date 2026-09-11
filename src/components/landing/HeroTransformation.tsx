@@ -74,7 +74,7 @@ const HeroTransformation = ({ profileImage, transformations }: HeroTransformatio
 
         <div className="mt-7 flex items-center justify-center gap-3 text-left">
           <span className="h-px w-8 bg-primary/70" />
-          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-200">Resultados reais de alunos reais</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-200">Resultados reais • Estratégias reais</p>
           <span className="h-px w-8 bg-primary/70" />
         </div>
 
