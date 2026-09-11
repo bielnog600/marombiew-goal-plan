@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import HeroTransformation from "@/components/landing/HeroTransformation";
 import { heroProfileImage, transformations } from "@/data/transformations";
 
-const CONSULTATION_WHATSAPP_LINK = "https://wa.me/351939184666?text=Ol%C3%A1%20Fabiel!%20Vi%20o%20seu%20perfil%20MAROMBEIW%20e%20gostaria%20de%20saber%20mais%20sobre%20a%20Consultoria%20Online.";
+const CONSULTATION_WHATSAPP_LINK = "https://wa.me/351939184666?text=Ol%C3%A1%20Fabiew!%20Gostaria%20de%20saber%20mais%20sobre%20a%20Consultoria%20Online.";
 
 const Home = () => {
   return (
@@ -49,7 +49,7 @@ const Home = () => {
       </main>
 
       <footer className="border-t border-white/10 px-4 py-8 text-center text-xs text-zinc-500">
-        MAROMBEIW GOAL PLAN — Treino. Nutrição. Estratégia.
+        GOAL PLAN — Treino. Nutrição. Estratégia.
       </footer>
     </div>
   );
