@@ -61,7 +61,7 @@ const HeroTransformation = ({ profileImage, transformations }: HeroTransformatio
           <img
             src={profileImage}
             alt="Fabiew, treinador"
-            className="absolute bottom-[31%] left-1/2 z-10 h-[70%] max-h-[560px] w-auto max-w-[70vw] -translate-x-1/2 object-contain object-bottom drop-shadow-[0_20px_28px_rgba(0,0,0,0.7)] sm:h-[52svh]"
+            className="absolute bottom-[31%] left-1/2 z-10 h-[65%] max-h-[520px] w-auto max-w-[70vw] -translate-x-1/2 object-contain object-bottom drop-shadow-[0_20px_28px_rgba(0,0,0,0.7)] sm:h-[48svh]"
             fetchPriority="high"
           />
           <div className="absolute inset-x-0 bottom-0 z-10 h-[48%] bg-gradient-to-b from-transparent via-[#050505]/90 to-[#050505]" />
