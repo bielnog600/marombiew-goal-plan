@@ -26,7 +26,7 @@ const HeroTransformation = ({ profileImage, transformations }: HeroTransformatio
       <div className="absolute inset-0 bg-[#050505]" />
       <div className="absolute inset-y-0 left-0 z-0 w-1/2 overflow-hidden" aria-hidden="true">
         <img
-          src="/uploads/1-1.png"
+          src="/uploads/1-1-nova.png"
           alt=""
           className="h-full w-full object-cover object-bottom opacity-70"
         />
