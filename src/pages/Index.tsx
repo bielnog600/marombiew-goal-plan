@@ -156,7 +156,7 @@ const Index = () => {
             VOLTAR
           </Link>
           <div className="mb-8 text-center">
-            <img src={logo} alt="Marombiew" className="logo-glow mx-auto h-16 object-contain" />
+            <img src={logo} alt="Marombiew" className="logo-glow mx-auto h-20 object-contain" />
             <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-zinc-400">
               Descubra uma estimativa personalizada de calorias e macronutrientes para o seu objetivo.
             </p>
