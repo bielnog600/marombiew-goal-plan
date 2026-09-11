@@ -10,6 +10,6 @@ export type Transformation = {
  * Exemplo: import profile from "@/assets/fabiel.png";
  * e import beforeAluno01 from "@/assets/aluno-01-antes.webp".
  */
-export const heroProfileImage: string | undefined = undefined;
+export const heroProfileImage: string | undefined = "/uploads/fabiew.png.jpeg";
 
 export const transformations: Transformation[] = [];
