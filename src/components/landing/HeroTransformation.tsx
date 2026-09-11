@@ -68,7 +68,7 @@ const HeroTransformation = ({ profileImage, transformations }: HeroTransformatio
       <div className="relative z-20 mx-auto w-full max-w-xl text-center">
         <h1 className="text-5xl font-bold uppercase leading-[0.9] tracking-tight text-white sm:text-6xl">Fabiew Aires</h1>
         <p className="mx-auto mt-4 max-w-sm text-sm leading-6 text-zinc-300">
-          Personal Trainer • Online Coaching
+          • Personal Trainer •
         </p>
         <p className="mt-3 text-xs font-medium uppercase tracking-[0.14em] text-zinc-500">Treino • Nutrição • Estratégia</p>
 
