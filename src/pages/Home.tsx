@@ -31,7 +31,7 @@ const Home = () => {
             <Link
               to="/calculadora"
               className="group flex min-h-[76px] w-full items-center rounded-3xl border border-white/15 bg-[#121212] px-5 text-white shadow-lg shadow-black/30 transition-all duration-200 hover:border-primary/70 hover:bg-[#191919] active:scale-[0.98]"
-              aria-label="Abrir Calculadora Fitness"
+              aria-label="Abrir Calculadora"
             >
               <Calculator className="h-7 w-7 shrink-0 text-primary" aria-hidden="true" />
               <span className="flex-1 px-4 text-center">
