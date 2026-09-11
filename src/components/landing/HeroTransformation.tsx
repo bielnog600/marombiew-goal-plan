@@ -24,6 +24,13 @@ const HeroTransformation = ({ profileImage, transformations }: HeroTransformatio
   return (
     <section className="relative isolate flex min-h-[calc(100svh-208px)] items-end overflow-hidden px-4 pb-8 pt-safe sm:min-h-[92svh] sm:px-6">
       <div className="absolute inset-0 bg-[#050505]" />
+      <div className="absolute inset-y-0 left-0 z-0 w-[58%] overflow-hidden" aria-hidden="true">
+        <img
+          src="/uploads/ff81c044-82c9-4754-abbb-da3d10e2c932.jpeg"
+          alt=""
+          className="absolute bottom-0 left-0 h-[145%] max-w-none w-auto object-contain object-bottom opacity-70"
+        />
+      </div>
 
       {transformation && (
         <div key={transformation.id} className="transformation-slide absolute inset-0">
