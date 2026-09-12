@@ -25,8 +25,16 @@ const HeroTransformation = ({ profileImage, transformations }: HeroTransformatio
     <section className="relative isolate flex min-h-[calc(100svh-208px)] items-end overflow-hidden px-4 pb-8 pt-safe sm:min-h-[92svh] sm:px-6">
       <div className="absolute inset-0 bg-[#050505]" />
 
-      <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/20 to-[#050505]" />
-      <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-[#050505] to-transparent" />
+      {profileImage && (
+        <img
+          src={profileImage}
+          alt="Fabiew Aires"
+          className="absolute inset-x-0 bottom-0 z-10 mx-auto h-[78%] w-full object-contain object-bottom opacity-90"
+        />
+      )}
+
+      <div className="absolute inset-0 z-10 bg-gradient-to-b from-black/55 via-black/20 to-[#050505]" />
+      <div className="absolute inset-x-0 top-0 z-10 h-32 bg-gradient-to-b from-[#050505] to-transparent" />
 
 
       <div className="relative z-20 mx-auto w-full max-w-xl text-center">
