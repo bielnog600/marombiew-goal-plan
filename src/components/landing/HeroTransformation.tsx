@@ -29,6 +29,11 @@ const HeroTransformation = ({ profileImage, transformations }: HeroTransformatio
         style={{ backgroundImage: "url('/uploads/1-1-background.png')" }}
         aria-hidden="true"
       />
+      <div
+        className="absolute inset-y-0 right-0 z-0 w-1/2 bg-cover bg-center opacity-45"
+        style={{ backgroundImage: "url('/uploads/home-right-background.png')" }}
+        aria-hidden="true"
+      />
 
       {profileImage && (
         <img
