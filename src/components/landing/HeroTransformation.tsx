@@ -35,7 +35,7 @@ const HeroTransformation = ({ profileImage, transformations }: HeroTransformatio
         aria-hidden="true"
       />
       <div
-        className="absolute inset-y-0 left-1/2 z-0 w-6 -translate-x-1/2 bg-gradient-to-r from-[#050505] via-black/80 to-[#050505]"
+        className="absolute inset-y-0 left-1/2 z-[1] w-32 -translate-x-1/2 bg-gradient-to-r from-transparent via-[#050505] to-transparent"
         aria-hidden="true"
       />
 
@@ -43,7 +43,7 @@ const HeroTransformation = ({ profileImage, transformations }: HeroTransformatio
         <img
           src={profileImage}
           alt="Fabiew Aires"
-          className="absolute inset-x-0 bottom-0 z-10 mx-auto h-[78%] w-full object-contain object-bottom opacity-90"
+          className="absolute inset-x-0 bottom-0 z-10 mx-auto h-[78%] w-full object-contain object-bottom opacity-100"
         />
       )}
 
