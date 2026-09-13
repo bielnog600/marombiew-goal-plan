@@ -25,13 +25,17 @@ const HeroTransformation = ({ profileImage, transformations }: HeroTransformatio
     <section className="relative isolate flex min-h-[calc(100svh-208px)] items-end overflow-hidden px-4 pb-8 pt-safe sm:min-h-[92svh] sm:px-6">
       <div className="absolute inset-0 bg-[#050505]" />
       <div
-        className="absolute inset-y-0 left-0 z-0 w-1/2 bg-cover bg-center opacity-45"
+        className="absolute inset-y-0 left-0 z-0 w-[calc(50%-12px)] bg-cover bg-center opacity-45"
         style={{ backgroundImage: "url('/uploads/1-1-background.png')" }}
         aria-hidden="true"
       />
       <div
-        className="absolute inset-y-0 right-0 z-0 w-1/2 bg-cover bg-center opacity-45"
+        className="absolute inset-y-0 right-0 z-0 w-[calc(50%-12px)] bg-cover bg-center opacity-45"
         style={{ backgroundImage: "url('/uploads/home-right-background.png')" }}
+        aria-hidden="true"
+      />
+      <div
+        className="absolute inset-y-0 left-1/2 z-0 w-6 -translate-x-1/2 bg-gradient-to-r from-[#050505] via-black/80 to-[#050505]"
         aria-hidden="true"
       />
 
